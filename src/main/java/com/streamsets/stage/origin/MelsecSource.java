@@ -25,10 +25,11 @@ import com.streamsets.stage.lib.MelsecOriginConstants;
 import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
 import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
 import com.streamsets.stage.origin.menuconfig.TagHexAddressInput;
-import com.streamsets.stage.origin.util.CommandGenerator;
 import com.streamsets.stage.origin.util.CommandRunner;
 
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 /**
  * This source is an example and does not actually read from anywhere.
@@ -70,30 +71,45 @@ public abstract class MelsecSource extends BaseSource {
      * {@inheritDoc}
      */
 
-    private Map<String, Integer> executeCommand(String plcAddrHexCode) throws Exception {
-        Map <String, Integer> resultMap;
-        CommandGenerator commandGenerator = new CommandGenerator(getSystemType().name());
-        CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getTimeOut());
+    private Map<String, Field> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws Exception {
+        Map <String, Field> resultMap = new HashMap<>();
+        CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
-        //TODO add for or foreach to have multiple command.
-        byte[] command = commandGenerator.getByteCommand(getXAddressRange().get(0).getStationId(), getXAddressRange().get(0).getNetworkId(), getXAddressRange().get(0).getCPULocation(), "00", "0000", MelsecOriginConstants.PLC_XADDR_HEXCODE);
-        resultMap = commandRunner.getBitInByteCommandResult(command, getXAddressRange().get(0).getBeginAddress(), getXAddressRange().get(0).getEndAddress(), plcAddrHexCode, getCommType().name());
+        for (TagHexAddressInput item : getPlcAddressRange) {
+            Map <String, Field> tempMap;
+            tempMap = commandRunner.readBitInByteCommandResult(
+                    item.getBeginAddress(), //begin Address
+                    item.getEndAddress(),  //endAddress
+                    item.getNetworkId(),  // NETWORK ID
+                    item.getPlcId(),  // PLC ID
+                    item.getCPULocation(),  // CPU Module(CPU LOCATION)
+                    item.getStationId(),  //Station ID
+                    item.getdataType(),
+                    plcAddrHexCode);
+            resultMap.putAll(tempMap);
+        }
         /////////////////////////////////////////
-
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - beginTime);
         return resultMap;
     }
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
-
-        Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+        long nextSourceOffset = 0;
+        if (lastSourceOffset != null) { nextSourceOffset = Long.parseLong(lastSourceOffset); }
         try {
+            long beginTime = System.currentTimeMillis();
             if (xAddressEnabled()) {
-
-                executeCommand(MelsecOriginConstants.PLC_XADDR_HEXCODE);
-
+                Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+                Map<String, Field> result;
+                result = executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE);
+                record.set(Field.create(result));
+                for (String key : result.keySet()) {
+                    System.out.println("key=" + key + "::::::::::::::::::value=" + result.get(key));
+                }
+                batchMaker.addRecord(record);
             }
+
             if (yAddressEnabled()) {
             }
        /* if(mAddressEnabled()){}
@@ -116,15 +132,16 @@ public abstract class MelsecSource extends BaseSource {
         if(zaAddressEnabled()){}
         if(rAddressEnabled()){}
         if(zrAddressEnabled()){}*/
-
-            batchMaker.addRecord(record);
-
-
+        long endTime = System.currentTimeMillis();
+        long timeGap = getTimeInterval()-(endTime-beginTime);
+        if(timeGap<0){timeGap = 0;}
+        sleep(timeGap);
         }
         catch (Exception e){
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
+                    e.printStackTrace();
                     return "Error01";
                 }
 
@@ -134,9 +151,10 @@ public abstract class MelsecSource extends BaseSource {
                 }
             };
             throw new StageException(errorCode);
-        }
 
-        return String.valueOf("");
+        }
+        ++nextSourceOffset;
+        return String.valueOf(nextSourceOffset);
     }
 
     public abstract MelsecCommtype getCommType();
@@ -171,6 +189,7 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean zrAddressEnabled();*/
 
     public abstract int getTimeOut();
+    public abstract int getTimeInterval();
 
     public abstract List<TagHexAddressInput> getXAddressRange();
 }

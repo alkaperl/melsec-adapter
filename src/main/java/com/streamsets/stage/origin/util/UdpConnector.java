@@ -1,5 +1,6 @@
 package com.streamsets.stage.origin.util;
 
+import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ class UdpConnector {
         this.port = port;
         this.timeOut = timeOut;
     }
-    byte[] makeUDPConnect(byte[] byteCommand) throws Exception {
+    byte[] makeUDPConnect(byte[] byteCommand) throws StageException {
         byte[] receiveMsg = new byte[1024];
         DatagramSocket socket = null;
         try {
@@ -22,18 +23,37 @@ class UdpConnector {
             socket.setSoTimeout(timeOut);
             DatagramPacket sendCommand = new DatagramPacket(byteCommand, byteCommand.length, ipAddr, port);
             socket.send(sendCommand);
-
             DatagramPacket rp = new DatagramPacket(receiveMsg, receiveMsg.length);
             socket.receive(rp);
             //receiveMsg = rp.getData();
             socket.close();
 
         } catch (UnknownHostException | SocketException e) {
-            throw new SocketException();
-        } catch (IOException e) {
-            socket.close();
-            throw new IOException();
+            ErrorCode errorCode = new ErrorCode() {
+                @Override
+                public String getCode() {
+                    return "404";
+                }
+                @Override
+                public String getMessage() {
+                    return "UDP Connection Has failed. Check Melsec UDP port is opened or ping command reachable";
+                }
+            };
+            throw new StageException(errorCode);
 
+            } catch (IOException e) {
+            ErrorCode errorCode = new ErrorCode() {
+                @Override
+                public String getCode() {
+                    return "401";
+                }
+                @Override
+                public String getMessage() {
+                    return "UDP Connection has established, However the UDP cannot get send Message.";
+                }
+            };
+            socket.close();
+            throw new StageException(errorCode);
         }
         return receiveMsg;
     }

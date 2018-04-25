@@ -34,12 +34,20 @@ public class TagHexAddressInput {
             displayPosition = 230
     )
     public String stationId = "";
-
+    @ConfigDef(
+            required = false,
+            type = ConfigDef.Type.STRING,
+            label = "PLC ID(HEX)",
+            defaultValue = "ff",
+            description = "",
+            displayPosition = 240
+    )
+    public String plcId = "";
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
             label = "Network ID(HEX)",
-            defaultValue = "",
+            defaultValue = "00",
             description = "",
             displayPosition = 240
     )
@@ -47,23 +55,24 @@ public class TagHexAddressInput {
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.MODEL,
-            label = "CPU Select",//03ff ...
+            label = MelsecOriginConstants.MELSEC_CPULOCATION_LABEL,//03ff ...
             defaultValue = "CPULOCAL",
             description = MelsecOriginConstants.MELSEC_CPU_LOCATION_DESC,
             displayPosition = 250
     )
     @ValueChooserModel(MelsecCPULocationChooserValues.class)
     public MelsecCPULocation cpuLocation = MelsecCPULocation.CPULOCAL;
-
     @ConfigDef(
             required = true,
-            type = ConfigDef.Type.BOOLEAN,
-            defaultValue = "true",
-            label = "Read only?",
-            description = "Read only",
-            displayPosition = 260
+            type = ConfigDef.Type.MODEL,
+            label = "Data Type",
+            defaultValue = "BOOLEAN",
+            description = MelsecOriginConstants.MELSEC_DATA_TYPE_DESC,
+            displayPosition = 250
     )
-    public boolean isReadOnly;
+    @ValueChooserModel(MelsecDataTypeChooserValues.class)
+    public MelsecDataType dataType = MelsecDataType.BOOLEAN;
+
 
     private String filloutValue(String address, String fillValue, int length){
         if(address.length()<length){ while (address.length()<length) address = fillValue + address; }
@@ -72,7 +81,9 @@ public class TagHexAddressInput {
     public String getBeginAddress(){ return filloutValue(beginAddress, "0", 6); }
     public String getEndAddress() { return filloutValue(endAddress, "0", 6); }
     public String getStationId() { return filloutValue(stationId, "0", 2); }
-    public String getNetworkId() { return filloutValue(networkId, "F", 2); }
+    public String getNetworkId() { return filloutValue(networkId, "0", 2); }
+    public String getPlcId() { return filloutValue(plcId, "F", 2); }
+    public String getdataType() { return dataType.name(); }
     public String getCPULocation() { return cpuLocation.name().equals("") ? "CPULOCAL":cpuLocation.name(); }
-    public boolean isReadonly() { return isReadOnly; }
+
 }

@@ -4,6 +4,8 @@ public final class MelsecOriginConstants {
     // CPU TIMER(0x00, 1 unit = 250 msec)
     public static final byte LOW_BYTE_CPU_TIMER = 0x02;
     public static final byte HI_BYTE_CPU_TIMER = 0x00;
+    //Tag Delimeter
+    public static final String TAG_DELIMETER = "_";
     // positions
     public static final int UI_DEFAULT_LOCATION = 10;
 
@@ -17,8 +19,9 @@ public final class MelsecOriginConstants {
     public static final String TIMEOUT_DESC = "Specify input TIMEOUT for Melsec can wait, default is 3 seconds(3000 msec)";
     public static final String MELSEC_TYPE_DESC = "Select a MODEL type for Mitsubishi melsec";
     public static final String MELSEC_CPU_LOCATION_DESC = "Select a CPU Location";
+    public static final String MELSEC_DATA_TYPE_DESC = "Select proper data type";
     public static final String COMMTYPE_DESC = "Select a Communication Type";
-
+    public static final String TIMEINTERVAL_DESC = "Specify input TIME Interval for Melsec communication running time, default is 1 seconds(1000 msec)";
 
     public static final String PLC_XADDR_DESC = "Specify input X-Range Address for server can collect";
     public static final String PLC_YADDR_DESC = "Specify input Y-Range Address for server can collect";
@@ -52,7 +55,11 @@ public final class MelsecOriginConstants {
     public static final String IP_ADDR_LABEL = "IP Address";
     public static final String PORT_LABEL = "Port";
     public static final String TIMEOUT_LABEL = "Timeout (Milliseconds)";
+    public static final String TIMEINTERVAL_LABEL = "Time Interval (Milliseconds)";
     public static final String MELSEC_TYPE_LABEL = "Model";
+    public static final String MELSEC_CPULOCATION_LABEL = "CPU Location";
+
+
     public static final String PLC_XADDR_LABEL = "Enable X Address";
     public static final String PLC_YADDR_LABEL = "Enable Y Address";
     public static final String PLC_MADDR_LABEL = "Enable M Address";
@@ -83,6 +90,13 @@ public final class MelsecOriginConstants {
     //option list
     public static final String TCPIP = "TCPIP";
     public static final String UDP = "UDP";
+    //Data TYPE option
+    public static final String BOOLEAN = "boolean(1Bit)";
+    public static final String FLOAT = "float(16Bit)";
+    public static final String WORD = "word(16Bit)";
+    public static final String DWORD = "Double Word(32Bit)";
+    public static final String SHORT = "Short Number(16 Bit)";
+
         //CPU TYPE OPTION
     public static final String Q_SERIES = "Q Series";
     public static final String A_SERIES = "A Series";
@@ -122,7 +136,7 @@ public final class MelsecOriginConstants {
     public static final String PLC_CNADDR_HEXCODE = "C5";
     public static final String PLC_SBADDR_HEXCODE = "A1";
     public static final String PLC_SWADDR_HEXCODE = "B5";
-    public static final String PLC_CADDR_HEXCODE = "98";
+    public static final String PLC_SADDR_HEXCODE = "98";
     public static final String PLC_DXADDR_HEXCODE = "A2";
     public static final String PLC_DYADDR_HEXCODE = "A3";
     public static final String PLC_ZADDR_HEXCODE = "CC";

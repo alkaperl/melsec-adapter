@@ -53,7 +53,7 @@ public class MelsecDSource extends MelsecSource {
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
-            defaultValue = "Q Series",
+            defaultValue = "Q_SERIES",
             label = MelsecOriginConstants.MELSEC_TYPE_LABEL,
             description = MelsecOriginConstants.MELSEC_TYPE_DESC,
             displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
@@ -93,6 +93,16 @@ public class MelsecDSource extends MelsecSource {
             group = MelsecOriginConstants.BASIC_GROUP
     )
     public int timeOut;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.NUMBER,
+            defaultValue = "1000",
+            label = MelsecOriginConstants.TIMEINTERVAL_LABEL,
+            description = MelsecOriginConstants.TIMEINTERVAL_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public int timeInterval;
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.BOOLEAN,
@@ -142,6 +152,10 @@ public class MelsecDSource extends MelsecSource {
     public boolean yAddressEnabled() { return yAddress; }
     @Override
     public int getTimeOut() { return timeOut; }
+
+    @Override
+    public int getTimeInterval() { return timeInterval; }
+
     @Override
     public List<TagHexAddressInput> getXAddressRange() { return xAddressRange; }
 }
