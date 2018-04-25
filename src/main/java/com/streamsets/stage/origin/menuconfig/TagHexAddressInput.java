@@ -3,6 +3,7 @@ package com.streamsets.stage.origin.menuconfig;
 import com.streamsets.pipeline.api.ConfigDef;
 import com.streamsets.pipeline.api.ValueChooserModel;
 import com.streamsets.stage.lib.MelsecOriginConstants;
+
 public class TagHexAddressInput {
     @ConfigDef(
             required = true,
@@ -74,16 +75,39 @@ public class TagHexAddressInput {
     public MelsecDataType dataType = MelsecDataType.BOOLEAN;
 
 
-    private String filloutValue(String address, String fillValue, int length){
-        if(address.length()<length){ while (address.length()<length) address = fillValue + address; }
+    private String filloutValue(String address, String fillValue, int length) {
+        if (address.length() < length) {
+            while (address.length() < length) address = fillValue + address;
+        }
         return address;
     }
-    public String getBeginAddress(){ return filloutValue(beginAddress, "0", 6); }
-    public String getEndAddress() { return filloutValue(endAddress, "0", 6); }
-    public String getStationId() { return filloutValue(stationId, "0", 2); }
-    public String getNetworkId() { return filloutValue(networkId, "0", 2); }
-    public String getPlcId() { return filloutValue(plcId, "F", 2); }
-    public String getdataType() { return dataType.name(); }
-    public String getCPULocation() { return cpuLocation.name().equals("") ? "CPULOCAL":cpuLocation.name(); }
+
+    public String getBeginAddress() {
+        return filloutValue(beginAddress, "0", 6);
+    }
+
+    public String getEndAddress() {
+        return filloutValue(endAddress, "0", 6);
+    }
+
+    public String getStationId() {
+        return filloutValue(stationId, "0", 2);
+    }
+
+    public String getNetworkId() {
+        return filloutValue(networkId, "0", 2);
+    }
+
+    public String getPlcId() {
+        return filloutValue(plcId, "F", 2);
+    }
+
+    public String getdataType() {
+        return dataType.name();
+    }
+
+    public String getCPULocation() {
+        return cpuLocation.name().equals("") ? "CPULOCAL" : cpuLocation.name();
+    }
 
 }

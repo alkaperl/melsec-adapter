@@ -11,8 +11,12 @@ public enum MelsecDataType implements Label {
     FLOAT(MelsecOriginConstants.FLOAT);
     private final String label;
 
-    MelsecDataType(String label) { this.label = label; }
+    MelsecDataType(String label) {
+        this.label = label;
+    }
 
     @Override
-    public String getLabel() { return label; }
+    public String getLabel() {
+        return label;
+    }
 }

@@ -24,6 +24,7 @@ import com.streamsets.stage.lib.MelsecOriginConstants;
 import com.streamsets.stage.origin.menuconfig.*;
 
 import java.util.List;
+
 @StageDef(
         version = 1,
         label = "Mitsubishi Melsec Data Origin",
@@ -137,25 +138,51 @@ public class MelsecDSource extends MelsecSource {
     @ListBeanModel
     public List<TagHexAddressInput> xAddressRange;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public MelsecCommtype getCommType() { return commType; }
-    @Override
-    public String getIpAddress() { return ipAddress; }
-    @Override
-    public int getPort() { return port; }
-    @Override
-    public MelsecSystemType getSystemType() { return systemType; }
-    @Override
-    public boolean xAddressEnabled() { return xAddress; }
-    @Override
-    public boolean yAddressEnabled() { return yAddress; }
-    @Override
-    public int getTimeOut() { return timeOut; }
+    public MelsecCommtype getCommType() {
+        return commType;
+    }
 
     @Override
-    public int getTimeInterval() { return timeInterval; }
+    public String getIpAddress() {
+        return ipAddress;
+    }
 
     @Override
-    public List<TagHexAddressInput> getXAddressRange() { return xAddressRange; }
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public MelsecSystemType getSystemType() {
+        return systemType;
+    }
+
+    @Override
+    public boolean xAddressEnabled() {
+        return xAddress;
+    }
+
+    @Override
+    public boolean yAddressEnabled() {
+        return yAddress;
+    }
+
+    @Override
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    @Override
+    public int getTimeInterval() {
+        return timeInterval;
+    }
+
+    @Override
+    public List<TagHexAddressInput> getXAddressRange() {
+        return xAddressRange;
+    }
 }

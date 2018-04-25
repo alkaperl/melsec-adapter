@@ -51,15 +51,16 @@ public enum Groups implements Label {
     DYTAG("DIRECT OUTPUT RELAY"),
     ZTAG("INDEX REGISTER"),
     RTAG("FILE REGISTER"),
-    ZRTAG("FILE REGISTER2")
-    ;
+    ZRTAG("FILE REGISTER2");
     private final String label;
 
     Groups(String label) {
         this.label = label;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getLabel() {
         return this.label;

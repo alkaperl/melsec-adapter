@@ -61,11 +61,11 @@ public class TagDecAddressInput {
 
     public String toString() {
         return "beginAddress:" + beginAddress +
-                "endAddress:"+endAddress+
-                "stationID"+stationId+
-                "networkID:"+networkId+
-                "CPULocation:"+cpuLocation+
-                "readonly:"+ isReadOnly;
+                "endAddress:" + endAddress +
+                "stationID" + stationId +
+                "networkID:" + networkId +
+                "CPULocation:" + cpuLocation +
+                "readonly:" + isReadOnly;
     }
 }
 

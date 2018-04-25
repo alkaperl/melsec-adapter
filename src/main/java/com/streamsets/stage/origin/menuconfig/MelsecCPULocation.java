@@ -15,8 +15,12 @@ public enum MelsecCPULocation implements Label {
     CPUSYSTEMB(MelsecOriginConstants.CPU_SYSTEM_B);
     private final String label;
 
-    MelsecCPULocation(String label) { this.label = label; }
+    MelsecCPULocation(String label) {
+        this.label = label;
+    }
 
     @Override
-    public String getLabel() { return label; }
+    public String getLabel() {
+        return label;
+    }
 }

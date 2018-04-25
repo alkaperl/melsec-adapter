@@ -13,8 +13,12 @@ public enum MelsecSystemType implements Label {
     IQR_SERIES(MelsecOriginConstants.IQR_SERIES);
     private final String label;
 
-    MelsecSystemType(String label) { this.label = label; }
+    MelsecSystemType(String label) {
+        this.label = label;
+    }
 
     @Override
-    public String getLabel() { return label; }
+    public String getLabel() {
+        return label;
+    }
 }

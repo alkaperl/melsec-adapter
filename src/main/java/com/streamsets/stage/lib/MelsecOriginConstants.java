@@ -97,7 +97,7 @@ public final class MelsecOriginConstants {
     public static final String DWORD = "Double Word(32Bit)";
     public static final String SHORT = "Short Number(16 Bit)";
 
-        //CPU TYPE OPTION
+    //CPU TYPE OPTION
     public static final String Q_SERIES = "Q Series";
     public static final String A_SERIES = "A Series";
     public static final String FX3U = "FX3U";
@@ -105,7 +105,7 @@ public final class MelsecOriginConstants {
     public static final String L_SERIES = "L Series";
     public static final String IQF_SERIES = "iQ-F Series";
     public static final String IQR_SERIES = "iQ-R Series";
-        //CPU LOCATION OPTION
+    //CPU LOCATION OPTION
     public static final String CPU_LOCAL = "Local CPU";
     public static final String CPU_CONTROL = "Control CPU";
     public static final String CPU_NO1 = "CPU No.1";
@@ -115,7 +115,7 @@ public final class MelsecOriginConstants {
     public static final String CPU_STANDBY = "Standby CPU";
     public static final String CPU_SYSTEM_A = "System A CPU";
     public static final String CPU_SYSTEM_B = "System B CPU";
-        //TAG LIST OPTION
+    //TAG LIST OPTION
     public static final String PLC_XADDR_HEXCODE = "9C";
     public static final String PLC_YADDR_HEXCODE = "9D";
     public static final String PLC_MADDR_HEXCODE = "90";

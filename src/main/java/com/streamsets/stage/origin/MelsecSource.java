@@ -27,7 +27,10 @@ import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
 import com.streamsets.stage.origin.menuconfig.TagHexAddressInput;
 import com.streamsets.stage.origin.util.CommandRunner;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.lang.Thread.sleep;
 
@@ -72,11 +75,11 @@ public abstract class MelsecSource extends BaseSource {
      */
 
     private Map<String, Field> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws Exception {
-        Map <String, Field> resultMap = new HashMap<>();
+        Map<String, Field> resultMap = new HashMap<>();
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
         for (TagHexAddressInput item : getPlcAddressRange) {
-            Map <String, Field> tempMap;
+            Map<String, Field> tempMap;
             tempMap = commandRunner.readBitInByteCommandResult(
                     item.getBeginAddress(), //begin Address
                     item.getEndAddress(),  //endAddress
@@ -93,10 +96,13 @@ public abstract class MelsecSource extends BaseSource {
         System.out.println(endTime - beginTime);
         return resultMap;
     }
+
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
         long nextSourceOffset = 0;
-        if (lastSourceOffset != null) { nextSourceOffset = Long.parseLong(lastSourceOffset); }
+        if (lastSourceOffset != null) {
+            nextSourceOffset = Long.parseLong(lastSourceOffset);
+        }
         try {
             long beginTime = System.currentTimeMillis();
             if (xAddressEnabled()) {
@@ -132,12 +138,13 @@ public abstract class MelsecSource extends BaseSource {
         if(zaAddressEnabled()){}
         if(rAddressEnabled()){}
         if(zrAddressEnabled()){}*/
-        long endTime = System.currentTimeMillis();
-        long timeGap = getTimeInterval()-(endTime-beginTime);
-        if(timeGap<0){timeGap = 0;}
-        sleep(timeGap);
-        }
-        catch (Exception e){
+            long endTime = System.currentTimeMillis();
+            long timeGap = getTimeInterval() - (endTime - beginTime);
+            if (timeGap < 0) {
+                timeGap = 0;
+            }
+            sleep(timeGap);
+        } catch (Exception e) {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
@@ -166,6 +173,7 @@ public abstract class MelsecSource extends BaseSource {
     public abstract MelsecSystemType getSystemType();
 
     public abstract boolean xAddressEnabled();
+
     public abstract boolean yAddressEnabled();
     /*public abstract boolean mAddressEnabled();
     public abstract boolean lAddressEnabled();
@@ -189,6 +197,7 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean zrAddressEnabled();*/
 
     public abstract int getTimeOut();
+
     public abstract int getTimeInterval();
 
     public abstract List<TagHexAddressInput> getXAddressRange();

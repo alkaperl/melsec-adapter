@@ -9,8 +9,5 @@
         <module name="melsec-adapter" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="melsec-adapter" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

@@ -9,11 +9,13 @@ import java.net.*;
 class UdpConnector {
     private String ip;
     private int port, timeOut;
-    UdpConnector(String ip, int port, int timeOut){
+
+    UdpConnector(String ip, int port, int timeOut) {
         this.ip = ip;
         this.port = port;
         this.timeOut = timeOut;
     }
+
     byte[] makeUDPConnect(byte[] byteCommand) throws StageException {
         byte[] receiveMsg = new byte[1024];
         DatagramSocket socket = null;
@@ -34,6 +36,7 @@ class UdpConnector {
                 public String getCode() {
                     return "404";
                 }
+
                 @Override
                 public String getMessage() {
                     return "UDP Connection Has failed. Check Melsec UDP port is opened or ping command reachable";
@@ -41,15 +44,16 @@ class UdpConnector {
             };
             throw new StageException(errorCode);
 
-            } catch (IOException e) {
+        } catch (IOException e) {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
                     return "401";
                 }
+
                 @Override
                 public String getMessage() {
-                    return "UDP Connection has established, However the UDP cannot get send Message.";
+                    return "UDP message has sent, but cannot receive reply message, Check the connectivity or port opened.";
                 }
             };
             socket.close();

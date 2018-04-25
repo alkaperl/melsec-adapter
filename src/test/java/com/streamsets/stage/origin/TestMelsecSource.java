@@ -38,15 +38,15 @@ public class TestMelsecSource {
     public void testOrigin() throws Exception {
         TagHexAddressInput testHexdata = new TagHexAddressInput();
         List<TagHexAddressInput> testHexList = new ArrayList<>();
-        testHexdata.beginAddress="000000";
-        testHexdata.endAddress="000003";
+        testHexdata.beginAddress = "000000";
+        testHexdata.endAddress = "000003";
         //testHexdata.networkId="FF";
         //testHexdata.stationId="00";
         //testHexdata.isReadOnly=true;
         testHexList.add(testHexdata);
         TagHexAddressInput testHexdata2 = new TagHexAddressInput();
-        testHexdata2.beginAddress="000005";
-        testHexdata2.endAddress="000007";
+        testHexdata2.beginAddress = "000005";
+        testHexdata2.endAddress = "000007";
         testHexList.add(testHexdata2);
 
         //{beginAddress: 000000, endAddress: 000000, stationID:00, networkID: FF,readonly:true};
@@ -64,7 +64,7 @@ public class TestMelsecSource {
                 .build();
 
 
-            runner.runInit();
+        runner.runInit();
         try {
             final String lastSourceOffset = null;
             StageRunner.Output output = runner.runProduce(lastSourceOffset, MAX_BATCH_SIZE);
