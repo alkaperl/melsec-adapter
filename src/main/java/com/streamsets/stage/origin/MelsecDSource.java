@@ -29,7 +29,7 @@ import java.util.List;
         version = 1,
         label = "Mitsubishi Melsec Data Origin",
         description = MelsecOriginConstants.MELSEC_ORIGIN_DESC,
-        icon = "default.png",
+        icon = "mitsubishi.png",
         execution = ExecutionMode.STANDALONE,
         recordsByRef = true,
         onlineHelpRefUrl = ""
@@ -107,6 +107,16 @@ public class MelsecDSource extends MelsecSource {
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "true",
+            label = MelsecOriginConstants.TRANSFER_MODE_LABEL,
+            description = MelsecOriginConstants.TRANSFER_MODE_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean transferMode;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
             defaultValue = "false",
             label = MelsecOriginConstants.PLC_XADDR_LABEL,
             description = MelsecOriginConstants.PLC_XADDR_DESC,
@@ -137,6 +147,19 @@ public class MelsecDSource extends MelsecSource {
     )
     @ListBeanModel
     public List<TagHexAddressInput> xAddressRange;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = "",
+            description = MelsecOriginConstants.PLC_YADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.YTAG_GROUP,
+            dependsOn = "yAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagHexAddressInput> yAddressRange;
 
     /**
      * {@inheritDoc}
@@ -180,9 +203,16 @@ public class MelsecDSource extends MelsecSource {
     public int getTimeInterval() {
         return timeInterval;
     }
-
+    @Override
+    public boolean getTransferMode() {
+        return transferMode;
+    }
     @Override
     public List<TagHexAddressInput> getXAddressRange() {
         return xAddressRange;
+    }
+    @Override
+    public List<TagHexAddressInput> getYAddressRange() {
+        return yAddressRange;
     }
 }

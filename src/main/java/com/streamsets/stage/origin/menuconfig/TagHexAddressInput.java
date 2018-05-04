@@ -79,6 +79,9 @@ public class TagHexAddressInput {
         if (address.length() < length) {
             while (address.length() < length) address = fillValue + address;
         }
+        else if (address.length()> length){
+            while (address.length() > length) address=address.substring(1, address.length());
+        }
         return address;
     }
 

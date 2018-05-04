@@ -33,22 +33,25 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.Thread.sleep;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * This source is an example and does not actually read from anywhere.
  * It does however, generate generate a simple record with one field.
  */
 public abstract class MelsecSource extends BaseSource {
-
+    private static final Logger LOG = LoggerFactory.getLogger(MelsecSource.class);
+    Map<String, Field> lastResultRecord;
     /**
      * Gives access to the UI configuration of the stage provided by the {@link MelsecDSource} class.
      */
 
     @Override
     protected List<ConfigIssue> init() {
+
         // Validate configuration values and open any required resources.
         List<ConfigIssue> issues = super.init();
-
+        lastResultRecord = new HashMap<>();
         /*if (getConfig().equals("invalidValue")) {
             issues.add(
                     getContext().createConfigIssue(
@@ -74,8 +77,9 @@ public abstract class MelsecSource extends BaseSource {
      * {@inheritDoc}
      */
 
-    private Map<String, Field> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws Exception {
+    private Map<String, Field> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         Map<String, Field> resultMap = new HashMap<>();
+
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
         for (TagHexAddressInput item : getPlcAddressRange) {
@@ -88,92 +92,133 @@ public abstract class MelsecSource extends BaseSource {
                     item.getCPULocation(),  // CPU Module(CPU LOCATION)
                     item.getStationId(),  //Station ID
                     item.getdataType(),
-                    plcAddrHexCode);
+                    plcAddrHexCode, 64);
             resultMap.putAll(tempMap);
         }
         /////////////////////////////////////////
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - beginTime);
+        //LOG.error(String.valueOf(endTime - beginTime));
         return resultMap;
     }
 
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
         long nextSourceOffset = 0;
+        Map<String, Field> currentResultRecord = new HashMap<>();
         if (lastSourceOffset != null) {
             nextSourceOffset = Long.parseLong(lastSourceOffset);
         }
         try {
+
             long beginTime = System.currentTimeMillis();
             if (xAddressEnabled()) {
-                Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
-                Map<String, Field> result;
-                result = executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE);
-                record.set(Field.create(result));
-                for (String key : result.keySet()) {
-                    System.out.println("key=" + key + "::::::::::::::::::value=" + result.get(key));
-                }
-                batchMaker.addRecord(record);
+                //Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+
+                //System.out.println("aaaaaa"+(endThreadTime - beginThreadTime));
+
+                currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE));
+                //record.set(Field.create(result));
+
+            /*for (String key : result.keySet()) {
+                System.out.println("key=" + key + "::::::::::::::::::value=" + result.get(key));
+            }*/
+                //batchMaker.addRecord(record);
             }
 
             if (yAddressEnabled()) {
+                //Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+                //System.out.println("aaaaaa"+(endThreadTime - beginThreadTime));
+                currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE));
+
+
+            /*for (String key : currentResultRecord.keySet()) {
+                System.out.println("key=" + key + "::::::::::::::::::value=" + currentResultRecord.get(key));
+            }*/
+                //System.out.println("Total address size::" + currentResultRecord.size());
+                //batchMaker.addRecord(record);
             }
-       /* if(mAddressEnabled()){}
-        if(lAddressEnabled()){}
-        if(fAddressEnabled()){}
-        if(vAddressEnabled()){}
-        if(dAddressEnabled()){}
-        if(wAddressEnabled()){}
-        if(tsAddressEnabled()){}
-        if(tcAddressEnabled()){}
-        if(tnAddressEnabled()){}
-        if(ssAddressEnabled()){}
-        if(scAddressEnabled()){}
-        if(snAddressEnabled()){}
-        if(csAddressEnabled()){}
-        if(ccAddressEnabled()){}
-        if(cnAddressEnabled()){}
-        if(dxAddressEnabled()){}
-        if(dyAddressEnabled()){}
-        if(zaAddressEnabled()){}
-        if(rAddressEnabled()){}
-        if(zrAddressEnabled()){}*/
+           /* if(mAddressEnabled()){}
+            if(lAddressEnabled()){}
+            if(fAddressEnabled()){}
+            if(vAddressEnabled()){}
+            if(dAddressEnabled()){}
+            if(wAddressEnabled()){}
+            if(tsAddressEnabled()){}
+            if(tcAddressEnabled()){}
+            if(tnAddressEnabled()){}
+            if(ssAddressEnabled()){}
+            if(scAddressEnabled()){}
+            if(snAddressEnabled()){}
+            if(csAddressEnabled()){}
+            if(ccAddressEnabled()){}
+            if(cnAddressEnabled()){}
+            if(dxAddressEnabled()){}
+            if(dyAddressEnabled()){}
+            if(zaAddressEnabled()){}
+            if(rAddressEnabled()){}
+            if(zrAddressEnabled()){}*/
+            if (getTransferMode()) {
+                if (lastResultRecord.size()==0){
+                    for (Object key : currentResultRecord.keySet()) {
+                        Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+                        System.out.println(key);
+                        record.set(Field.create(currentResultRecord));
+                        batchMaker.addRecord(record);
+                    }
+                }
+                else {
+                    for (Object key : currentResultRecord.keySet()) {
+                        if (!lastResultRecord.get(key).equals(currentResultRecord.get(key))) {
+                            Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+                            System.out.println(key);
+                            record.set(Field.create(currentResultRecord));
+                            batchMaker.addRecord(record);
+                        }
+                    }
+                }
+                lastResultRecord = (Map<String, Field>) ((HashMap<String, Field>) currentResultRecord).clone();
+                currentResultRecord.clear();
+            }
+
             long endTime = System.currentTimeMillis();
             long timeGap = getTimeInterval() - (endTime - beginTime);
             if (timeGap < 0) {
                 timeGap = 0;
             }
             sleep(timeGap);
-        } catch (Exception e) {
+
+        } catch (StageException e) {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
-                public String getCode() {
-                    e.printStackTrace();
-                    return "Error01";
-                }
-
+                public String getCode() { return e.getErrorCode().getCode(); }
                 @Override
-                public String getMessage() {
-                    return "Error Code Occurred";
-                }
+                public String getMessage() { return e.getMessage().substring(6); }
             };
             throw new StageException(errorCode);
 
+        } catch (InterruptedException e) {
+            ErrorCode errorCode = new ErrorCode() {
+                @Override
+                public String getCode() {
+                    return "999";
+                }
+                @Override
+                public String getMessage() {
+                    return "General Error";
+                }
+            };
+            throw new StageException(errorCode);
         }
         ++nextSourceOffset;
         return String.valueOf(nextSourceOffset);
     }
 
     public abstract MelsecCommtype getCommType();
-
     public abstract String getIpAddress();
-
     public abstract int getPort();
-
     public abstract MelsecSystemType getSystemType();
-
     public abstract boolean xAddressEnabled();
-
     public abstract boolean yAddressEnabled();
     /*public abstract boolean mAddressEnabled();
     public abstract boolean lAddressEnabled();
@@ -195,10 +240,11 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean zaAddressEnabled();
     public abstract boolean rAddressEnabled();
     public abstract boolean zrAddressEnabled();*/
-
     public abstract int getTimeOut();
-
     public abstract int getTimeInterval();
 
+    public abstract boolean getTransferMode();
+
     public abstract List<TagHexAddressInput> getXAddressRange();
+    public abstract List<TagHexAddressInput> getYAddressRange();
 }

@@ -2,10 +2,11 @@ package com.streamsets.stage.origin.util;
 
 import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
+import com.streamsets.stage.lib.MelsecOriginConstants;
 
 import java.io.*;
 import java.net.*;
-
+////////////////ERROR CODE BEGINS 450 (cannot connect)
 public class TcpConnector {
     private String ip;
     private int port;
@@ -17,7 +18,7 @@ public class TcpConnector {
         this.port = port;
         this.timeOut = timeOut;
     }
-    byte[] makeTCPConnect(byte[] byteCommand) throws StageException, IOException {
+    byte[] makeTCPConnect(byte[] byteCommand) throws StageException {
         byte[] resultMsg = new byte[1024];
         try {
             socket = new Socket(ip, port);
@@ -31,12 +32,12 @@ public class TcpConnector {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "454";
+                    return MelsecOriginConstants.ERROR_454;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "TCP Connection Has failed. Check Melsec TDP port is opened or ping command reachable";
+                    return MelsecOriginConstants.ERROR_454_MESSAGE;
                 }
             };
             throw new StageException(errorCode);
@@ -45,15 +46,19 @@ public class TcpConnector {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "451";
+                    return MelsecOriginConstants.ERROR_451;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "TCP Connection has established, However the TDP cannot get send Message.";
+                    return MelsecOriginConstants.ERROR_451_MESSAGE;
                 }
             };
-            socket.close();
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             throw new StageException(errorCode);
         }
         return resultMsg;

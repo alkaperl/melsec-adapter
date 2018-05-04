@@ -2,17 +2,21 @@ package com.streamsets.stage.lib;
 
 public final class MelsecOriginConstants {
     // CPU TIMER(0x00, 1 unit = 250 msec)
-    public static final byte LOW_BYTE_CPU_TIMER = 0x02;
+    public static final byte LOW_BYTE_CPU_TIMER = 0x02; //CPU WAIT TIMER 0x02 00means 250*02 = 500Msecs
     public static final byte HI_BYTE_CPU_TIMER = 0x00;
     //Tag Delimeter
     public static final String TAG_DELIMETER = "_";
     // positions
     public static final int UI_DEFAULT_LOCATION = 10;
 
+    public static final int DEFAULT_BYTE_SIZE_READ_IN_BINARY = 16;  // Byte size per every command, the default value is 16(16Bits)
+
     //Groups
     public static final String BASIC_GROUP = "BASIC";
     public static final String XTAG_GROUP = "XTAG";
+    public static final String YTAG_GROUP = "YTAG";
     ///descriptions
+    public static final String TRANSFER_MODE_DESC = "If true, Transfer data only tag value changes. can save lots of dataflow";
     public static final String MELSEC_ORIGIN_DESC = "Mitsubishi PLC melsec data connector";
     public static final String IP_ADDR_DESC = "Set Mitsubishi PLC IP addrress (Default is 'localhost')";
     public static final String PORT_DESC = "Specify input port for Melsec can use of. Default value is 5000(UDP), 5100(TCP)";
@@ -51,6 +55,7 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZRADDR_DESC = "Specify input ZR-Range Address for server can collect";
 
     /////////////////LABEL
+    public static final String TRANSFER_MODE_LABEL = "Transfer Mode";
     public static final String COMMTYPE_LABEL = "Communication Type";
     public static final String IP_ADDR_LABEL = "IP Address";
     public static final String PORT_LABEL = "Port";
@@ -142,4 +147,28 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZADDR_HEXCODE = "CC";
     public static final String PLC_RADDR_HEXCODE = "AF";
     public static final String PLC_ZRADDR_HEXCODE = "B0";
+
+    /////////////ERRORS
+    public static final String ERROR_401 = "401";
+    public static final String ERROR_401_MESSAGE = "UDP Connection Has failed. Check Melsec UDP port is opened or ping command reachable";
+    public static final String ERROR_404 = "404";
+    public static final String ERROR_404_MESSAGE = "UDP message has sent, but cannot receive reply message, Check the connectivity or port opened.";
+    public static final String ERROR_451 = "451";
+    public static final String ERROR_451_MESSAGE = "TCP Connection has established, However the TDP cannot get send Message.";
+    public static final String ERROR_454 = "454";
+    public static final String ERROR_454_MESSAGE ="TCP Connection Has failed. Check Melsec TDP port is opened or ping command reachable";
+    public static final String ERROR_500 = "500";
+    public static final String ERROR_500_MESSAGE ="System Type cannot verified, for building address binary check System Type. Some model is not implemented!";
+    public static final String ERROR_501 = "501";
+    public static final String ERROR_501_MESSAGE = "System Type cannot verified for building command binary, check System Type. Some model is not implemented!";
+    public static final String ERROR_502 = "502";
+    public static final String ERROR_502_MESSAGE ="";
+    public static final String ERROR_503 = "503";
+    public static final String ERROR_503_MESSAGE ="System Type cannot verified for dataType, check System Type. Some model is not implemented!";
+    public static final String ERROR_504 = "504";
+    public static final String ERROR_504_MESSAGE ="System Type cannot verified for building CPU Location, check System Type. Some model is not implemented!";
+    public static final String ERROR_505 = "505";
+    public static final String ERROR_505_MESSAGE ="Register Tag cannot verified during building the result address";
+
+
 }

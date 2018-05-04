@@ -5,14 +5,16 @@ import com.streamsets.pipeline.api.Field;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class CommandRunner {
     private String systemType;
     private String ip;
     private int port, timeOut;
     private String commType;
+    private String networkId, plcId, cpuLocation, stationId, dataType, tagType;
+    private String currentAddress, endAddress;
 
     public CommandRunner(String ip, int port, String systemType, String commType, int timeOut) {
         this.systemType = systemType;
@@ -56,12 +58,12 @@ public class CommandRunner {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "504";
+                    return MelsecOriginConstants.ERROR_504;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "System Type cannot verified for building CPU Location, check System Type. Some model is not implemented!";
+                    return MelsecOriginConstants.ERROR_504_MESSAGE;
                 }
             };
             throw new StageException(errorCode);
@@ -74,32 +76,31 @@ public class CommandRunner {
         try {
             switch (dataType) {
                 case "BOOLEAN":
-                    byteCommand = new byte[]{0x01, 0x00, 0x01, 0x00};  //bit read 1 bit
+                    byteCommand = new byte[]{0x01, 0x00};  //bit read 1 bit
                     break;
                 case "WORD":
-                    byteCommand = new byte[]{0x00, 0x00, 0x01, 0x00};  //word read 1 bit
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
                 case "SHORT":
-                    byteCommand = new byte[]{0x00, 0x00, 0x01, 0x00};  //word read 1 bit
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
                 case "FLOAT":
-                    byteCommand = new byte[]{0x00, 0x00, 0x02, 0x00};  //word read 2 bit
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
                     break;
                 case "DWORD":
-                    byteCommand = new byte[]{0x00, 0x00, 0x02, 0x00};  //word read 2 bit
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
                     break;
-
             }
         } catch (Exception e) {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "503";
+                    return MelsecOriginConstants.ERROR_503;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "System Type cannot verified for dataType, check System Type. Some model is not implemented!";
+                    return MelsecOriginConstants.ERROR_503_MESSAGE;
                 }
             };
             throw new StageException(errorCode);
@@ -107,9 +108,9 @@ public class CommandRunner {
         return byteCommand;
     }
 
-    private String getTagPrefix(String tagType) throws StageException {
+    private String getTagPrefix(String tagType) {
         String result = "";
-        try {
+
             switch (tagType) {
                 case MelsecOriginConstants.PLC_XADDR_HEXCODE:
                     result = "X";
@@ -130,6 +131,9 @@ public class CommandRunner {
                     result = "V";
                     break;
                 case MelsecOriginConstants.PLC_BADDR_HEXCODE:
+                    result = "B";
+                    break;
+                case MelsecOriginConstants.PLC_DADDR_HEXCODE:
                     result = "D";
                     break;
                 case MelsecOriginConstants.PLC_WADDR_HEXCODE:
@@ -183,20 +187,7 @@ public class CommandRunner {
                 case MelsecOriginConstants.PLC_ZRADDR_HEXCODE:
                     result = "ZR";
                     break;
-            }
-        } catch (Exception e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return "505";
-                }
 
-                @Override
-                public String getMessage() {
-                    return "Register Tag cannot verified during building the result address";
-                }
-            };
-            throw new StageException(errorCode);
         }
         return result;
     }
@@ -212,7 +203,7 @@ public class CommandRunner {
         return ba;
     }
 
-    private byte[] getByteCommand(String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType) throws StageException {
+    private byte[] getByteCommand() throws StageException {
         byte[] byteCommand = null;
         byte[] cpuLocationByte = getCpuLocationByteCommand(cpuLocation);
         byte[] subCommand = getSubCommand(dataType);
@@ -226,10 +217,10 @@ public class CommandRunner {
                             0x0C, 0x00,//request length 요 뒤에 총 12개 바이트가 이ㅆ으(default value = 12(C))
                             MelsecOriginConstants.LOW_BYTE_CPU_TIMER, MelsecOriginConstants.HI_BYTE_CPU_TIMER,//cpu timer
                             0x01, 0x04,//Main command
-                            subCommand[3], subCommand[2],//sub command(bits read or word read? word 01 00)
+                            subCommand[1], subCommand[0],//sub command(bits read or word read? word 01 00)
                             0x00, 0x00, 0x00,//default value 0
                             hexToByteArray(tagType)[0],//D*
-                            subCommand[1], subCommand[0]};//1 point read(default 1)
+                            0x01,0x00};//1 point read(default 1)
                     break;
                 case "A_SERIES":
                     break;
@@ -248,12 +239,12 @@ public class CommandRunner {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "501";
+                    return MelsecOriginConstants.ERROR_501;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "System Type cannot verified for building command binary, check System Type. Some model is not implemented!";
+                    return MelsecOriginConstants.ERROR_501_MESSAGE;
                 }
             };
             throw new StageException(errorCode);
@@ -261,8 +252,8 @@ public class CommandRunner {
         return byteCommand;
     }
 
-    private int singleBitInByteCommand(byte[] byteCommand, String address, String commType) throws StageException {
-        UdpConnector udpConnector = new UdpConnector(ip, port, timeOut);
+    private List<Integer> sendBitInByteCommand(String address, long blockSize) throws StageException{
+        byte byteCommand [] = getByteCommand();
         byte[] resultMsg = null;
         try {
             switch (systemType) {
@@ -285,101 +276,124 @@ public class CommandRunner {
                 case "IQR_SERIES":
                     break;
             }
+            byteCommand[19]= (byte)(blockSize);
+            byteCommand[20]= (byte)(blockSize >> 8);
+
         } catch (Exception e) {
             ErrorCode errorCode = new ErrorCode() {
                 @Override
                 public String getCode() {
-                    return "500";
+                    return MelsecOriginConstants.ERROR_500;
                 }
 
                 @Override
                 public String getMessage() {
-                    return "System Type cannot verified, for building address binary check System Type. Some model is not implemented!";
+                    return MelsecOriginConstants.ERROR_500_MESSAGE;
                 }
             };
             throw new StageException(errorCode);
         }
+        int resultLength=0;
         if (commType.equals("UDP")) {
+            UdpConnector udpConnector = new UdpConnector(ip, port, timeOut);
             resultMsg = udpConnector.makeUDPConnect(byteCommand);
+            resultLength = udpConnector.getLength();
 
-        }//TODO/////////////////////////////////////////////////////////////////
-        //else { resultMsg = tcpConnector.makeTCPConnect(byteCommand); }
-
-        return resultParser(resultMsg);
-    }
-
-    private int resultParser(byte[] byteResult) {
-        int intResult = Integer.parseInt(String.valueOf(byteResult[11]));
-        if (intResult < 0) {
-            intResult += 256;
         }
-        return intResult;
+        else if (commType.equals("TCPIP")) {
+            TcpConnector tcpConnector = new TcpConnector(ip,port, timeOut);
+            resultMsg = tcpConnector.makeTCPConnect(byteCommand);
+        }
+
+        return resultBuilder(resultMsg, resultLength);
     }
 
-    private String increaseHex(String currentAddress) {
-        long addressNext = Long.parseLong(currentAddress, 16);
-        addressNext = addressNext + 1;
-        String result = Long.toHexString(addressNext);
-        while (result.length() < 6) {
-            result = "0" + result;
+    private List<Integer> resultBuilder(byte[] byteResult, int length) {
+        List<Integer> result = new ArrayList();
+        for (int i=11; i< length;i++) {
+            int resultInt = Integer.parseInt(String.valueOf(byteResult[i]));
+            if(resultInt< 0 ) resultInt = resultInt+256;
+            result.add(resultInt);
         }
         return result;
+    }
+
+    private String increaseHex(String currentAddress, int step) {
+        long addressNext = Long.parseLong(currentAddress, 16);
+        addressNext = addressNext + step;
+        StringBuilder result = new StringBuilder(Long.toHexString(addressNext));
+        while (result.length() < 6) {
+            result.insert(0, "0");
+        }
+        return result.toString();
     }
 
     private String increaseDecimal(String currentAddress) {
         return String.valueOf(Long.parseLong(currentAddress) + 1);
     }
 
-    private String getFullMelsecAddress(String currentAddress, String networkId, String plcId, String cpuLocation, String stationId, String tagType) throws StageException {
+    private String getFullMelsecAddress(String currentAddress) {
         StringBuilder fullAddress = new StringBuilder();
         fullAddress.append(getTagPrefix(tagType)).append(currentAddress);
         fullAddress.append(MelsecOriginConstants.TAG_DELIMETER).append(networkId).append(MelsecOriginConstants.TAG_DELIMETER).append(plcId).append(MelsecOriginConstants.TAG_DELIMETER).append(cpuLocation).append(MelsecOriginConstants.TAG_DELIMETER).append(stationId);
         return String.valueOf(fullAddress);
     }
 
-    public Map<String, Field> readBitInByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType) throws Exception {
-
-        byte[] byteCommand = getByteCommand(networkId, plcId, cpuLocation, stationId, dataType, tagType);
+    public Map<String, Field> readBitInByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
+        ////////////////////////////////////////////////
+        //Initial the global variables.
+        this.networkId = networkId;
+        this.plcId = plcId;
+        this.cpuLocation = cpuLocation;
+        this.dataType = dataType;
+        this.tagType = tagType;
+        this.stationId = stationId;
+        this.endAddress = endAddressString;
+        /////////////////////////////////////////////////
 
         Map<String, Field> resultMap = new HashMap<>();
-        long beginAddress, endAddress = 0;
+        Map<String, Field> tempMap;
+
+        long beginAddress, endAddress;
+        //HEX value tags, each data address should read HEX  value
         if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_MADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_LADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_FADDR_HEXCODE) ||
                 tagType.equals(MelsecOriginConstants.PLC_VADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_TSADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_TCADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SSADDR_HEXCODE) ||
                 tagType.equals(MelsecOriginConstants.PLC_SCADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SNADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_CSADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_CCADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||
                 tagType.equals(MelsecOriginConstants.PLC_SADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE)) {
             beginAddress = Long.parseLong(beginAddressString, 16);
-            if (!endAddressString.equals("")) {
-                endAddress = Long.parseLong(endAddressString, 16);
+            endAddress = Long.parseLong(endAddressString, 16);
+            long count = endAddress - beginAddress +1;
+            if(count < 0) { count = 0; }
+            int byteCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
+            int blockRemain = byteCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
+            int blockCount = (byteCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
+
+            currentAddress = beginAddressString;
+
+            for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
+                if (i < blockCount) { tempMap = singleBlockInByteCommand(currentAddress, blockSize); }
+                else { tempMap = singleBlockInByteCommand(currentAddress, blockRemain); }
+                resultMap.putAll(tempMap);
             }
-            long count;
-            if (!endAddressString.equals("000000")) {
-                count = endAddress - beginAddress;
-            } else {
-                count = 1;
-            }
-            String currentAddress = beginAddressString;
-            for (int i = 0; i <= count; i++) {
-                resultMap.put(getFullMelsecAddress(currentAddress, networkId, plcId, cpuLocation, stationId, tagType), Field.create(singleBitInByteCommand(byteCommand, currentAddress, commType)));
-                currentAddress = increaseHex(currentAddress);
-                if (dataType.equals(MelsecOriginConstants.DWORD) || dataType.equals(MelsecOriginConstants.FLOAT)) {
-                    currentAddress = increaseHex(currentAddress);
+        }
+        else {//Decimal command count
+
+        }
+        return resultMap;
+    }
+
+    private Map<String, Field> singleBlockInByteCommand(String currentAddress, int blockSize) throws StageException {
+        Map<String, Field> resultMap=new HashMap<>();
+        for (Integer item : sendBitInByteCommand(currentAddress, blockSize)) {
+            for (int i = 0; i < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; i++) {
+                try { resultMap.put(getFullMelsecAddress(currentAddress), Field.create(Integer.parseInt(Integer.toBinaryString(item).substring(i, i + 1)))); }
+                catch (StringIndexOutOfBoundsException e) { resultMap.put(getFullMelsecAddress(currentAddress), Field.create(0)); }
+                if(currentAddress.equalsIgnoreCase(this.endAddress)){
+                    this.currentAddress = currentAddress;
+                    break;
+                    //return resultMap;
                 }
-            }
-        } else {//Decimal command count
-            beginAddress = Long.parseLong(beginAddressString);
-            if (!endAddressString.equals("000000")) {
-                endAddress = Long.parseLong(endAddressString);
-            }
-            long count;
-            if (!endAddressString.equals("")) {
-                count = endAddress - beginAddress;
-            } else {
-                count = 1;
-            }
-            String currentAddress = beginAddressString;
-            for (int i = 0; i <= count; i++) {
-                resultMap.put(getFullMelsecAddress(currentAddress, networkId, plcId, cpuLocation, stationId, tagType), Field.create(singleBitInByteCommand(byteCommand, currentAddress, commType)));
-                currentAddress = increaseDecimal(currentAddress);
+                currentAddress = increaseHex(currentAddress, 1);
             }
         }
         return resultMap;
