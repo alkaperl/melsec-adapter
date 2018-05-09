@@ -148,6 +148,27 @@ public class MelsecDSource extends MelsecSource {
     public boolean yAddress;
     @ConfigDef(
             required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
+            label = MelsecOriginConstants.PLC_MADDR_LABEL,
+            description = MelsecOriginConstants.PLC_MADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean mAddress;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
+            label = MelsecOriginConstants.PLC_DADDR_LABEL,
+            description = MelsecOriginConstants.PLC_DADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean dAddress;
+
+    @ConfigDef(
+            required = true,
             type = ConfigDef.Type.MODEL,
             defaultValue = "",
             label = "",
@@ -172,6 +193,34 @@ public class MelsecDSource extends MelsecSource {
     )
     @ListBeanModel
     public List<TagHexAddressInput> yAddressRange;
+
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = "",
+            description = MelsecOriginConstants.PLC_MADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.MTAG_GROUP,
+            dependsOn = "mAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagHexAddressInput> mAddressRange;
+
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = "",
+            description = MelsecOriginConstants.PLC_DADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.DTAG_GROUP,
+            dependsOn = "dAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagHexAddressInput> dAddressRange;
 
     /**
      * {@inheritDoc}
@@ -207,6 +256,14 @@ public class MelsecDSource extends MelsecSource {
     }
 
     @Override
+    public boolean mAddressEnabled() {
+        return mAddress;
+    }
+    @Override
+    public boolean dAddressEnabled() {
+        return dAddress;
+    }
+    @Override
     public int getTimeOut() {
         return timeOut;
     }
@@ -231,4 +288,8 @@ public class MelsecDSource extends MelsecSource {
     public List<TagHexAddressInput> getYAddressRange() {
         return yAddressRange;
     }
+    @Override
+    public List<TagHexAddressInput> getMAddressRange() { return mAddressRange; }
+    @Override
+    public List<TagHexAddressInput> getDAddressRange() { return dAddressRange; }
 }

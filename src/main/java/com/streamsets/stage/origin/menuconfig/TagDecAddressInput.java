@@ -10,7 +10,9 @@ public class TagDecAddressInput {
             type = ConfigDef.Type.STRING,
             label = "Start Address(DEC)",
             defaultValue = "000000",
-            description = ""
+            description = "",
+            displayPosition = 210
+
     )
     public String beginAddress = "";
 
@@ -19,53 +21,94 @@ public class TagDecAddressInput {
             type = ConfigDef.Type.STRING,
             label = "End Address(DEC)",
             defaultValue = "",
-            description = ""
+            description = "",
+            displayPosition = 220
     )
     public String endAddress = "";
 
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "Station ID(HEX)",//00ff
+            label = "Station ID(HEX)",
             defaultValue = "",
-            description = ""
+            description = "",
+            displayPosition = 230
     )
     public String stationId = "";
-
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "Network ID(HEX)",//00ff
-            defaultValue = "",
-            description = ""
+            label = "PLC ID(HEX)",
+            defaultValue = "ff",
+            description = "",
+            displayPosition = 240
+    )
+    public String plcId = "";
+    @ConfigDef(
+            required = false,
+            type = ConfigDef.Type.STRING,
+            label = "Network ID(HEX)",
+            defaultValue = "00",
+            description = "",
+            displayPosition = 240
     )
     public String networkId = "";
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.MODEL,
-            label = "CPU",//03ff ...
-            defaultValue = "",
-            description = MelsecOriginConstants.MELSEC_CPU_LOCATION_DESC
+            label = MelsecOriginConstants.MELSEC_CPULOCATION_LABEL,//03ff ...
+            defaultValue = "CPULOCAL",
+            description = MelsecOriginConstants.MELSEC_CPU_LOCATION_DESC,
+            displayPosition = 250
     )
-    @ValueChooserModel(MelsecCommtypeChooserValues.class)
+    @ValueChooserModel(MelsecCPULocationChooserValues.class)
     public MelsecCPULocation cpuLocation = MelsecCPULocation.CPULOCAL;
+
     @ConfigDef(
             required = true,
-            type = ConfigDef.Type.BOOLEAN,
-            defaultValue = "true",
-            label = "Read only?",
-            description = "Read only"
+            type = ConfigDef.Type.MODEL,
+            label = "Data Type",
+            defaultValue = "BOOLEAN",
+            description = MelsecOriginConstants.MELSEC_DATA_TYPE_DESC,
+            displayPosition = 250
     )
-    public boolean isReadOnly;
+    @ValueChooserModel(MelsecDataTypeChooserValues.class)
+    public MelsecDataType dataType = MelsecDataType.BOOLEAN;
 
 
-    public String toString() {
-        return "beginAddress:" + beginAddress +
-                "endAddress:" + endAddress +
-                "stationID" + stationId +
-                "networkID:" + networkId +
-                "CPULocation:" + cpuLocation +
-                "readonly:" + isReadOnly;
+    private String filloutValue(String address, String fillValue, int length) {
+        if (address.length() < length) { while (address.length() < length) address = fillValue + address; }
+        else if (address.length()> length){ while (address.length() > length) address=address.substring(1, address.length()); }
+        return address;
+    }
+
+    public String getBeginAddress() {
+        return filloutValue(beginAddress, "0", 6);
+    }
+
+    public String getEndAddress() {
+        if(endAddress.length()!=0){ return filloutValue(endAddress, "0", 6);}
+        else { return getBeginAddress(); }
+    }
+
+    public String getStationId() {
+        return filloutValue(stationId, "0", 2);
+    }
+
+    public String getNetworkId() {
+        return filloutValue(networkId, "0", 2);
+    }
+
+    public String getPlcId() {
+        return filloutValue(plcId, "F", 2);
+    }
+
+    public String getdataType() {
+        return dataType.name();
+    }
+
+    public String getCPULocation() {
+        return cpuLocation.name().equals("") ? "CPULOCAL" : cpuLocation.name();
     }
 }
 

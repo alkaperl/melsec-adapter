@@ -22,9 +22,7 @@ package com.streamsets.stage.origin;
 import com.streamsets.pipeline.api.Record;
 import com.streamsets.pipeline.sdk.SourceRunner;
 import com.streamsets.pipeline.sdk.StageRunner;
-import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
-import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
-import com.streamsets.stage.origin.menuconfig.TagHexAddressInput;
+import com.streamsets.stage.origin.menuconfig.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,27 +34,33 @@ public class TestMelsecSource {
 
     @Test
     public void testOrigin() throws Exception {
-        TagHexAddressInput testHexdata = new TagHexAddressInput();
-        List<TagHexAddressInput> testHexList = new ArrayList<>();
-        testHexdata.beginAddress = "000000";
-        testHexdata.endAddress = "000003";
-        //testHexdata.networkId="FF";
-        //testHexdata.stationId="00";
-        //testHexdata.isReadOnly=true;
-        testHexList.add(testHexdata);
-        /*TagHexAddressInput testHexdata2 = new TagHexAddressInput();
-        testHexdata2.beginAddress = "000010";
-        testHexdata2.endAddress = "000015";
-        testHexList.add(testHexdata2);*/
+        TagHexAddressInput testDdata = new TagHexAddressInput();
+
+        List<TagHexAddressInput> testDList = new ArrayList<>();
+        testDdata.beginAddress = "000100";
+        testDdata.endAddress = "000101";
+        testDdata.dataType = MelsecDataType.DWORD;
+        testDList.add(testDdata);
+
+        TagHexAddressInput testMdata = new TagHexAddressInput();
+        List<TagHexAddressInput> testMList = new ArrayList<>();
+        testMdata.beginAddress = "000000";
+        testMdata.endAddress = "000200";
+        testMdata.dataType = MelsecDataType.BOOLEAN;
+        testMList.add(testMdata);
+
 
         SourceRunner runner = new SourceRunner.Builder(MelsecDSource.class)
                 .addConfiguration("maxBlockSize", 256)
                 .addConfiguration("transferMode", false)
                 .addConfiguration("xAddress", false)
+                .addConfiguration("yAddress", false)
+                .addConfiguration("mAddress", false)
+                .addConfiguration("mAddressRange", testMList)
+                .addConfiguration("dAddress", true)
+                .addConfiguration("dAddressRange", testDList)
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)
-                .addConfiguration("yAddress", true)
-                .addConfiguration("yAddressRange", testHexList)
                 .addConfiguration("port", 5000)
                 .addConfiguration("commType", MelsecCommtype.UDP)
                 .addConfiguration("systemType", MelsecSystemType.Q_SERIES)

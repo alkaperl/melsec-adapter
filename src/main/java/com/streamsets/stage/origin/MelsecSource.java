@@ -79,12 +79,11 @@ public abstract class MelsecSource extends BaseSource {
 
     private Map<String, Integer> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         Map<String, Integer> resultMap = new HashMap<>();
-
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
         for (TagHexAddressInput item : getPlcAddressRange) {
             Map<String, Integer> tempMap;
-            tempMap = commandRunner.readBitInByteCommandResult(
+            tempMap = commandRunner.readByteCommandResult(
                     item.getBeginAddress(), //begin Address
                     item.getEndAddress(),  //endAddress
                     item.getNetworkId(),  // NETWORK ID
@@ -101,7 +100,6 @@ public abstract class MelsecSource extends BaseSource {
         //LOG.error(String.valueOf(endTime - beginTime));
         return resultMap;
     }
-
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
         long nextSourceOffset = 0;
@@ -113,13 +111,12 @@ public abstract class MelsecSource extends BaseSource {
 
             long beginTime = System.currentTimeMillis();
             if (xAddressEnabled()) { currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE)); }
-
             if (yAddressEnabled()) { currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE)); }
-           /* if(mAddressEnabled()){}
-            if(lAddressEnabled()){}
+            if (mAddressEnabled()) { currentResultRecord.putAll(executeCommand(getMAddressRange(), MelsecOriginConstants.PLC_MADDR_HEXCODE)); }
+            if (dAddressEnabled()) { currentResultRecord.putAll(executeCommand(getDAddressRange(), MelsecOriginConstants.PLC_DADDR_HEXCODE)); }
+            /*if(lAddressEnabled()){}
             if(fAddressEnabled()){}
             if(vAddressEnabled()){}
-            if(dAddressEnabled()){}
             if(wAddressEnabled()){}
             if(tsAddressEnabled()){}
             if(tcAddressEnabled()){}
@@ -211,11 +208,13 @@ public abstract class MelsecSource extends BaseSource {
     public abstract MelsecSystemType getSystemType();
     public abstract boolean xAddressEnabled();
     public abstract boolean yAddressEnabled();
-    /*public abstract boolean mAddressEnabled();
-    public abstract boolean lAddressEnabled();
+    public abstract boolean mAddressEnabled();
+    public abstract boolean dAddressEnabled();
+
+    /*public abstract boolean lAddressEnabled();
     public abstract boolean fAddressEnabled();
     public abstract boolean vAddressEnabled();
-    public abstract boolean dAddressEnabled();
+
     public abstract boolean wAddressEnabled();
     public abstract boolean tsAddressEnabled();
     public abstract boolean tcAddressEnabled();
@@ -240,4 +239,8 @@ public abstract class MelsecSource extends BaseSource {
 
     public abstract List<TagHexAddressInput> getXAddressRange();
     public abstract List<TagHexAddressInput> getYAddressRange();
+
+    public abstract List<TagHexAddressInput> getMAddressRange();
+
+    public abstract List<TagHexAddressInput> getDAddressRange();
 }

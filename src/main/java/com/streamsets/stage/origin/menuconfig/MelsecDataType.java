@@ -6,9 +6,9 @@ import com.streamsets.stage.lib.MelsecOriginConstants;
 public enum MelsecDataType implements Label {
     BOOLEAN(MelsecOriginConstants.BOOLEAN),
     WORD(MelsecOriginConstants.WORD),
-    SHORT(MelsecOriginConstants.SHORT),
-    DWORD(MelsecOriginConstants.DWORD),
-    FLOAT(MelsecOriginConstants.FLOAT);
+    //SHORT(MelsecOriginConstants.SHORT),
+    DWORD(MelsecOriginConstants.DWORD);
+    //FLOAT(MelsecOriginConstants.FLOAT);
     private final String label;
 
     MelsecDataType(String label) {
