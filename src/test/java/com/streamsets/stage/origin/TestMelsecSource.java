@@ -39,7 +39,7 @@ public class TestMelsecSource {
         TagHexAddressInput testHexdata = new TagHexAddressInput();
         List<TagHexAddressInput> testHexList = new ArrayList<>();
         testHexdata.beginAddress = "000000";
-        testHexdata.endAddress = "000001";
+        testHexdata.endAddress = "000003";
         //testHexdata.networkId="FF";
         //testHexdata.stationId="00";
         //testHexdata.isReadOnly=true;
@@ -50,7 +50,8 @@ public class TestMelsecSource {
         testHexList.add(testHexdata2);*/
 
         SourceRunner runner = new SourceRunner.Builder(MelsecDSource.class)
-                .addConfiguration("transferMode", true)
+                .addConfiguration("maxBlockSize", 256)
+                .addConfiguration("transferMode", false)
                 .addConfiguration("xAddress", false)
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)

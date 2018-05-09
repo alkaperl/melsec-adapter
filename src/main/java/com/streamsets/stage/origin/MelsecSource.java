@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class MelsecSource extends BaseSource {
     private static final Logger LOG = LoggerFactory.getLogger(MelsecSource.class);
-    Map<String, Field> lastResultRecord;
+    Map<String, Integer> lastResultRecord;
     /**
      * Gives access to the UI configuration of the stage provided by the {@link MelsecDSource} class.
      */
@@ -77,13 +77,13 @@ public abstract class MelsecSource extends BaseSource {
      * {@inheritDoc}
      */
 
-    private Map<String, Field> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
-        Map<String, Field> resultMap = new HashMap<>();
+    private Map<String, Integer> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
+        Map<String, Integer> resultMap = new HashMap<>();
 
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
         for (TagHexAddressInput item : getPlcAddressRange) {
-            Map<String, Field> tempMap;
+            Map<String, Integer> tempMap;
             tempMap = commandRunner.readBitInByteCommandResult(
                     item.getBeginAddress(), //begin Address
                     item.getEndAddress(),  //endAddress
@@ -92,7 +92,7 @@ public abstract class MelsecSource extends BaseSource {
                     item.getCPULocation(),  // CPU Module(CPU LOCATION)
                     item.getStationId(),  //Station ID
                     item.getdataType(),
-                    plcAddrHexCode, 64);
+                    plcAddrHexCode, getMaxBlockSize());
             resultMap.putAll(tempMap);
         }
         /////////////////////////////////////////
@@ -105,39 +105,16 @@ public abstract class MelsecSource extends BaseSource {
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
         long nextSourceOffset = 0;
-        Map<String, Field> currentResultRecord = new HashMap<>();
+        Map<String, Integer> currentResultRecord = new HashMap<>();
         if (lastSourceOffset != null) {
             nextSourceOffset = Long.parseLong(lastSourceOffset);
         }
         try {
 
             long beginTime = System.currentTimeMillis();
-            if (xAddressEnabled()) {
-                //Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+            if (xAddressEnabled()) { currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE)); }
 
-                //System.out.println("aaaaaa"+(endThreadTime - beginThreadTime));
-
-                currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE));
-                //record.set(Field.create(result));
-
-            /*for (String key : result.keySet()) {
-                System.out.println("key=" + key + "::::::::::::::::::value=" + result.get(key));
-            }*/
-                //batchMaker.addRecord(record);
-            }
-
-            if (yAddressEnabled()) {
-                //Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
-                //System.out.println("aaaaaa"+(endThreadTime - beginThreadTime));
-                currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE));
-
-
-            /*for (String key : currentResultRecord.keySet()) {
-                System.out.println("key=" + key + "::::::::::::::::::value=" + currentResultRecord.get(key));
-            }*/
-                //System.out.println("Total address size::" + currentResultRecord.size());
-                //batchMaker.addRecord(record);
-            }
+            if (yAddressEnabled()) { currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE)); }
            /* if(mAddressEnabled()){}
             if(lAddressEnabled()){}
             if(fAddressEnabled()){}
@@ -159,11 +136,13 @@ public abstract class MelsecSource extends BaseSource {
             if(rAddressEnabled()){}
             if(zrAddressEnabled()){}*/
             if (getTransferMode()) {
+
                 if (lastResultRecord.size()==0){
                     for (Object key : currentResultRecord.keySet()) {
                         Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
-                        System.out.println(key);
-                        record.set(Field.create(currentResultRecord));
+                        Map <String, Field> resultMap = new HashMap<>();
+                        resultMap.put(key.toString(), Field.create(currentResultRecord.get(key)));
+                        record.set(Field.create(resultMap));
                         batchMaker.addRecord(record);
                     }
                 }
@@ -171,13 +150,24 @@ public abstract class MelsecSource extends BaseSource {
                     for (Object key : currentResultRecord.keySet()) {
                         if (!lastResultRecord.get(key).equals(currentResultRecord.get(key))) {
                             Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
-                            System.out.println(key);
-                            record.set(Field.create(currentResultRecord));
+                            Map <String, Field> resultMap = new HashMap<>();
+                            resultMap.put(key.toString(), Field.create(currentResultRecord.get(key)));
+                            record.set(Field.create(resultMap));
                             batchMaker.addRecord(record);
                         }
                     }
                 }
-                lastResultRecord = (Map<String, Field>) ((HashMap<String, Field>) currentResultRecord).clone();
+                lastResultRecord = (Map<String, Integer>) ((HashMap<String, Integer>) currentResultRecord).clone();
+                currentResultRecord.clear();
+            }
+            else{
+                for (Object key : currentResultRecord.keySet()) {
+                    Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
+                    Map <String, Field> resultMap = new HashMap<>();
+                    resultMap.put(key.toString(), Field.create(currentResultRecord.get(key)));
+                    record.set(Field.create(resultMap));
+                    batchMaker.addRecord(record);
+                }
                 currentResultRecord.clear();
             }
 
@@ -213,6 +203,7 @@ public abstract class MelsecSource extends BaseSource {
         ++nextSourceOffset;
         return String.valueOf(nextSourceOffset);
     }
+    //private Record getRecord (Map<String, Integer> currentMap);
 
     public abstract MelsecCommtype getCommType();
     public abstract String getIpAddress();
@@ -242,6 +233,8 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean zrAddressEnabled();*/
     public abstract int getTimeOut();
     public abstract int getTimeInterval();
+
+    public abstract int getMaxBlockSize();
 
     public abstract boolean getTransferMode();
 

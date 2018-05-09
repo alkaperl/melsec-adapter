@@ -106,6 +106,18 @@ public class MelsecDSource extends MelsecSource {
     public int timeInterval;
     @ConfigDef(
             required = true,
+            type = ConfigDef.Type.NUMBER,
+            defaultValue = "256",
+            label = MelsecOriginConstants.MAXBLOCK_LABEL,
+            description = MelsecOriginConstants.MAXBLOCK_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP,
+            min = MelsecOriginConstants.MIN_BLOCK_SIZE,
+            max = MelsecOriginConstants.MAX_BLOCK_SIZE
+    )
+    public int maxBlockSize;
+    @ConfigDef(
+            required = true,
             type = ConfigDef.Type.BOOLEAN,
             defaultValue = "true",
             label = MelsecOriginConstants.TRANSFER_MODE_LABEL,
@@ -202,6 +214,10 @@ public class MelsecDSource extends MelsecSource {
     @Override
     public int getTimeInterval() {
         return timeInterval;
+    }
+    @Override
+    public int getMaxBlockSize() {
+        return maxBlockSize;
     }
     @Override
     public boolean getTransferMode() {

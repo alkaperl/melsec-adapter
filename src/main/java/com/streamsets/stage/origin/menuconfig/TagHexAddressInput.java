@@ -63,6 +63,7 @@ public class TagHexAddressInput {
     )
     @ValueChooserModel(MelsecCPULocationChooserValues.class)
     public MelsecCPULocation cpuLocation = MelsecCPULocation.CPULOCAL;
+
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -76,12 +77,8 @@ public class TagHexAddressInput {
 
 
     private String filloutValue(String address, String fillValue, int length) {
-        if (address.length() < length) {
-            while (address.length() < length) address = fillValue + address;
-        }
-        else if (address.length()> length){
-            while (address.length() > length) address=address.substring(1, address.length());
-        }
+        if (address.length() < length) { while (address.length() < length) address = fillValue + address; }
+        else if (address.length()> length){ while (address.length() > length) address=address.substring(1, address.length()); }
         return address;
     }
 
@@ -90,7 +87,8 @@ public class TagHexAddressInput {
     }
 
     public String getEndAddress() {
-        return filloutValue(endAddress, "0", 6);
+        if(endAddress.length()!=0){ return filloutValue(endAddress, "0", 6);}
+        else { return getBeginAddress(); }
     }
 
     public String getStationId() {

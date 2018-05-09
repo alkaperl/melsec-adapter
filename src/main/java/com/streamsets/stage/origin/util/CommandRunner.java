@@ -76,7 +76,7 @@ public class CommandRunner {
         try {
             switch (dataType) {
                 case "BOOLEAN":
-                    byteCommand = new byte[]{0x01, 0x00};  //bit read 1 bit
+                    byteCommand = new byte[]{0x00, 0x00};  //bit read 1 bit
                     break;
                 case "WORD":
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
@@ -339,7 +339,7 @@ public class CommandRunner {
         return String.valueOf(fullAddress);
     }
 
-    public Map<String, Field> readBitInByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
+    public Map<String, Integer> readBitInByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
         ////////////////////////////////////////////////
         //Initial the global variables.
         this.networkId = networkId;
@@ -351,8 +351,8 @@ public class CommandRunner {
         this.endAddress = endAddressString;
         /////////////////////////////////////////////////
 
-        Map<String, Field> resultMap = new HashMap<>();
-        Map<String, Field> tempMap;
+        Map<String, Integer> resultMap = new HashMap<>();
+        Map<String, Integer> tempMap;
 
         long beginAddress, endAddress;
         //HEX value tags, each data address should read HEX  value
@@ -364,9 +364,9 @@ public class CommandRunner {
             endAddress = Long.parseLong(endAddressString, 16);
             long count = endAddress - beginAddress +1;
             if(count < 0) { count = 0; }
-            int byteCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
-            int blockRemain = byteCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
-            int blockCount = (byteCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
+            int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
+            int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
+            int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
 
             currentAddress = beginAddressString;
 
@@ -382,13 +382,13 @@ public class CommandRunner {
         return resultMap;
     }
 
-    private Map<String, Field> singleBlockInByteCommand(String currentAddress, int blockSize) throws StageException {
-        Map<String, Field> resultMap=new HashMap<>();
+    private Map<String, Integer> singleBlockInByteCommand(String currentAddress, int blockSize) throws StageException {
+        Map<String, Integer> resultMap=new HashMap<>();
         for (Integer item : sendBitInByteCommand(currentAddress, blockSize)) {
             for (int i = 0; i < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; i++) {
-                try { resultMap.put(getFullMelsecAddress(currentAddress), Field.create(Integer.parseInt(Integer.toBinaryString(item).substring(i, i + 1)))); }
-                catch (StringIndexOutOfBoundsException e) { resultMap.put(getFullMelsecAddress(currentAddress), Field.create(0)); }
-                if(currentAddress.equalsIgnoreCase(this.endAddress)){
+                String returnValue = returnBinaryValue(item);
+                resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(15-i, 16-i)));
+            if(currentAddress.equalsIgnoreCase(this.endAddress)){
                     this.currentAddress = currentAddress;
                     break;
                     //return resultMap;
@@ -397,5 +397,12 @@ public class CommandRunner {
             }
         }
         return resultMap;
+    }
+    private String returnBinaryValue (Integer itemValue){
+        StringBuilder returnValue = new StringBuilder(Integer.toBinaryString(itemValue));
+        while (returnValue.length()< MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY){
+            returnValue.insert(0, "0");
+        }
+        return returnValue.toString();
     }
 }

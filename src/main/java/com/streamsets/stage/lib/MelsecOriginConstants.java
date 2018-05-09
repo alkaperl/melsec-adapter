@@ -10,7 +10,9 @@ public final class MelsecOriginConstants {
     public static final int UI_DEFAULT_LOCATION = 10;
 
     public static final int DEFAULT_BYTE_SIZE_READ_IN_BINARY = 16;  // Byte size per every command, the default value is 16(16Bits)
-
+    //Block size
+    public static final int MIN_BLOCK_SIZE = 1;
+    public static final int MAX_BLOCK_SIZE = 256;
     //Groups
     public static final String BASIC_GROUP = "BASIC";
     public static final String XTAG_GROUP = "XTAG";
@@ -25,6 +27,7 @@ public final class MelsecOriginConstants {
     public static final String MELSEC_CPU_LOCATION_DESC = "Select a CPU Location";
     public static final String MELSEC_DATA_TYPE_DESC = "Select proper data type";
     public static final String COMMTYPE_DESC = "Select a Communication Type";
+    public static final String MAXBLOCK_DESC = "Specify input Block (word) units per one read command, do not exceed 256";
     public static final String TIMEINTERVAL_DESC = "Specify input TIME Interval for Melsec communication running time, default is 1 seconds(1000 msec)";
 
     public static final String PLC_XADDR_DESC = "Specify input X-Range Address for server can collect";
@@ -63,7 +66,7 @@ public final class MelsecOriginConstants {
     public static final String TIMEINTERVAL_LABEL = "Time Interval (Milliseconds)";
     public static final String MELSEC_TYPE_LABEL = "Model";
     public static final String MELSEC_CPULOCATION_LABEL = "CPU Location";
-
+    public static final String MAXBLOCK_LABEL = "Maximum BlockSize (word unit)";
 
     public static final String PLC_XADDR_LABEL = "Enable X Address";
     public static final String PLC_YADDR_LABEL = "Enable Y Address";
