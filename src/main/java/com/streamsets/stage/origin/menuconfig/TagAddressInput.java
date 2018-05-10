@@ -4,7 +4,7 @@ import com.streamsets.pipeline.api.ConfigDef;
 import com.streamsets.pipeline.api.ValueChooserModel;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
-public class TagHexAddressInput {
+public class TagAddressInput {
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.STRING,
