@@ -8,9 +8,9 @@ public class TagAddressInput {
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.STRING,
-            label = "Start Address(HEX)",
+            label = MelsecOriginConstants.START_ADDRESS_LABEL,
             defaultValue = "000000",
-            description = "",
+            description = MelsecOriginConstants.START_ADDRESS_DESC,
             displayPosition = 210
 
     )
@@ -19,9 +19,9 @@ public class TagAddressInput {
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "End Address(HEX)",
+            label = MelsecOriginConstants.END_ADDRESS_LABEL,
             defaultValue = "",
-            description = "",
+            description = MelsecOriginConstants.END_ADDRESS_DESC,
             displayPosition = 220
     )
     public String endAddress = "";
@@ -29,27 +29,27 @@ public class TagAddressInput {
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "Station ID(HEX)",
+            label = MelsecOriginConstants.STATION_ID_LABEL,
             defaultValue = "",
-            description = "",
+            description = MelsecOriginConstants.STATION_ID_DESC,
             displayPosition = 230
     )
     public String stationId = "";
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "PLC ID(HEX)",
-            defaultValue = "ff",
-            description = "",
+            label = MelsecOriginConstants.PLC_ID_LABEL,
+            defaultValue = "",
+            description = MelsecOriginConstants.PLC_ID_DESC,
             displayPosition = 240
     )
     public String plcId = "";
     @ConfigDef(
             required = false,
             type = ConfigDef.Type.STRING,
-            label = "Network ID(HEX)",
-            defaultValue = "00",
-            description = "",
+            label = MelsecOriginConstants.NETWORK_ID_LABEL,
+            defaultValue = "",
+            description = MelsecOriginConstants.NETWORK_ID_DESC,
             displayPosition = 240
     )
     public String networkId = "";
@@ -67,14 +67,13 @@ public class TagAddressInput {
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
-            label = "Data Type",
+            label = MelsecOriginConstants.DATA_TYPE_LABEL,
             defaultValue = "BOOLEAN",
             description = MelsecOriginConstants.MELSEC_DATA_TYPE_DESC,
             displayPosition = 250
     )
     @ValueChooserModel(MelsecDataTypeChooserValues.class)
     public MelsecDataType dataType = MelsecDataType.BOOLEAN;
-
 
     private String filloutValue(String address, String fillValue, int length) {
         if (address.length() < length) { while (address.length() < length) address = fillValue + address; }
@@ -94,19 +93,15 @@ public class TagAddressInput {
     public String getStationId() {
         return filloutValue(stationId, "0", 2);
     }
-
     public String getNetworkId() {
         return filloutValue(networkId, "0", 2);
     }
-
     public String getPlcId() {
         return filloutValue(plcId, "F", 2);
     }
-
     public String getdataType() {
         return dataType.name();
     }
-
     public String getCPULocation() {
         return cpuLocation.name().equals("") ? "CPULOCAL" : cpuLocation.name();
     }

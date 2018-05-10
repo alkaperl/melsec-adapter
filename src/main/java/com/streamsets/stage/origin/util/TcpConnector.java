@@ -4,8 +4,12 @@ import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
-import java.io.*;
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 ////////////////ERROR CODE BEGINS 450 (cannot connect)
 public class TcpConnector {
     private String ip;

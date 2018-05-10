@@ -26,6 +26,8 @@ import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
 import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
 import com.streamsets.stage.origin.menuconfig.TagAddressInput;
 import com.streamsets.stage.origin.util.CommandRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +35,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.Thread.sleep;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * This source is an example and does not actually read from anywhere.
  * It does however, generate generate a simple record with one field.
@@ -80,7 +80,7 @@ public abstract class MelsecSource extends BaseSource {
     private Map<String, Integer> executeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         Map<String, Integer> resultMap = new HashMap<>();
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
-        long beginTime = System.currentTimeMillis();
+        //long beginTime = System.currentTimeMillis();
         for (TagAddressInput item : getPlcAddressRange) {
             Map<String, Integer> tempMap;
             tempMap = commandRunner.readByteCommandResult(
@@ -95,8 +95,8 @@ public abstract class MelsecSource extends BaseSource {
             resultMap.putAll(tempMap);
         }
         /////////////////////////////////////////
-        long endTime = System.currentTimeMillis();
-        System.out.println(endTime - beginTime);
+        //long endTime = System.currentTimeMillis();
+        //System.out.println(endTime - beginTime);
         //LOG.error(String.valueOf(endTime - beginTime));
         return resultMap;
     }
@@ -108,32 +108,75 @@ public abstract class MelsecSource extends BaseSource {
             nextSourceOffset = Long.parseLong(lastSourceOffset);
         }
         try {
-
             long beginTime = System.currentTimeMillis();
-            if (xAddressEnabled()) { currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE)); }
-            if (yAddressEnabled()) { currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE)); }
-            if (mAddressEnabled()) { currentResultRecord.putAll(executeCommand(getMAddressRange(), MelsecOriginConstants.PLC_MADDR_HEXCODE)); }
-            if (dAddressEnabled()) { currentResultRecord.putAll(executeCommand(getDAddressRange(), MelsecOriginConstants.PLC_DADDR_HEXCODE)); }
-            /*if(lAddressEnabled()){}
-            if(fAddressEnabled()){}
-            if(vAddressEnabled()){}
-            if(wAddressEnabled()){}
-            if(tsAddressEnabled()){}
-            if(tcAddressEnabled()){}
-            if(tnAddressEnabled()){}
-            if(ssAddressEnabled()){}
-            if(scAddressEnabled()){}
-            if(snAddressEnabled()){}
-            if(csAddressEnabled()){}
-            if(ccAddressEnabled()){}
-            if(cnAddressEnabled()){}
-            if(dxAddressEnabled()){}
-            if(dyAddressEnabled()){}
-            if(zaAddressEnabled()){}
-            if(rAddressEnabled()){}
-            if(zrAddressEnabled()){}*/
-            if (getTransferMode()) {
+            if (xAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE));
+            }
+            if (yAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getYAddressRange(), MelsecOriginConstants.PLC_YADDR_HEXCODE));
+            }
+            if (mAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getMAddressRange(), MelsecOriginConstants.PLC_MADDR_HEXCODE));
+            }
+            if (dAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getDAddressRange(), MelsecOriginConstants.PLC_DADDR_HEXCODE));
+            }
+            if (lAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getLAddressRange(), MelsecOriginConstants.PLC_LADDR_HEXCODE));
+            }
+            if (fAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getFAddressRange(), MelsecOriginConstants.PLC_FADDR_HEXCODE));
+            }
+            if (vAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getVAddressRange(), MelsecOriginConstants.PLC_VADDR_HEXCODE));
+            }
+            if (wAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getWAddressRange(), MelsecOriginConstants.PLC_WADDR_HEXCODE));
+            }
+            if (tsAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getTSAddressRange(), MelsecOriginConstants.PLC_TSADDR_HEXCODE));
+            }
+            if (tcAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getTCAddressRange(), MelsecOriginConstants.PLC_TCADDR_HEXCODE));
+            }
+            if (tnAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getTNAddressRange(), MelsecOriginConstants.PLC_TNADDR_HEXCODE));
+            }
+            if (ssAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSSAddressRange(), MelsecOriginConstants.PLC_SSADDR_HEXCODE));
+            }
+            if (scAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSCAddressRange(), MelsecOriginConstants.PLC_SCADDR_HEXCODE));
+            }
+            if (snAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSNAddressRange(), MelsecOriginConstants.PLC_SNADDR_HEXCODE));
+            }
+            if (csAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getCSAddressRange(), MelsecOriginConstants.PLC_CSADDR_HEXCODE));
+            }
+            if (ccAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getCCAddressRange(), MelsecOriginConstants.PLC_CCADDR_HEXCODE));
+            }
+            if (cnAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getCNAddressRange(), MelsecOriginConstants.PLC_CNADDR_HEXCODE));
+            }
+            if (dxAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getDXAddressRange(), MelsecOriginConstants.PLC_DXADDR_HEXCODE));
+            }
+            if (dyAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getDYAddressRange(), MelsecOriginConstants.PLC_DYADDR_HEXCODE));
+            }
+            if (zAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getZAddressRange(), MelsecOriginConstants.PLC_ZADDR_HEXCODE));
+            }
+            if (rAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getRAddressRange(), MelsecOriginConstants.PLC_RADDR_HEXCODE));
+            }
+            if (zrAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getZRAddressRange(), MelsecOriginConstants.PLC_ZRADDR_HEXCODE));
+            }
 
+            if (getTransferMode()) {
                 if (lastResultRecord.size()==0){
                     for (Object key : currentResultRecord.keySet()) {
                         Record record = getContext().createRecord(String.valueOf(UUID.randomUUID()));
@@ -200,21 +243,27 @@ public abstract class MelsecSource extends BaseSource {
         ++nextSourceOffset;
         return String.valueOf(nextSourceOffset);
     }
-    //private Record getRecord (Map<String, Integer> currentMap);
 
     public abstract MelsecCommtype getCommType();
     public abstract String getIpAddress();
     public abstract int getPort();
     public abstract MelsecSystemType getSystemType();
+
+    public abstract int getTimeOut();
+
+    public abstract int getTimeInterval();
+
+    public abstract int getMaxBlockSize();
+
+    public abstract boolean getTransferMode();
     public abstract boolean xAddressEnabled();
     public abstract boolean yAddressEnabled();
     public abstract boolean mAddressEnabled();
     public abstract boolean dAddressEnabled();
 
-    /*public abstract boolean lAddressEnabled();
+    public abstract boolean lAddressEnabled();
     public abstract boolean fAddressEnabled();
     public abstract boolean vAddressEnabled();
-
     public abstract boolean wAddressEnabled();
     public abstract boolean tsAddressEnabled();
     public abstract boolean tcAddressEnabled();
@@ -227,20 +276,49 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean cnAddressEnabled();
     public abstract boolean dxAddressEnabled();
     public abstract boolean dyAddressEnabled();
-    public abstract boolean zaAddressEnabled();
+
+    public abstract boolean zAddressEnabled();
     public abstract boolean rAddressEnabled();
-    public abstract boolean zrAddressEnabled();*/
-    public abstract int getTimeOut();
-    public abstract int getTimeInterval();
 
-    public abstract int getMaxBlockSize();
-
-    public abstract boolean getTransferMode();
-
+    public abstract boolean zrAddressEnabled();
     public abstract List<TagAddressInput> getXAddressRange();
     public abstract List<TagAddressInput> getYAddressRange();
-
     public abstract List<TagAddressInput> getMAddressRange();
-
     public abstract List<TagAddressInput> getDAddressRange();
+
+    public abstract List<TagAddressInput> getLAddressRange();
+
+    public abstract List<TagAddressInput> getFAddressRange();
+
+    public abstract List<TagAddressInput> getVAddressRange();
+
+    public abstract List<TagAddressInput> getWAddressRange();
+
+    public abstract List<TagAddressInput> getTSAddressRange();
+
+    public abstract List<TagAddressInput> getTCAddressRange();
+
+    public abstract List<TagAddressInput> getTNAddressRange();
+
+    public abstract List<TagAddressInput> getSSAddressRange();
+
+    public abstract List<TagAddressInput> getSCAddressRange();
+
+    public abstract List<TagAddressInput> getSNAddressRange();
+
+    public abstract List<TagAddressInput> getCSAddressRange();
+
+    public abstract List<TagAddressInput> getCCAddressRange();
+
+    public abstract List<TagAddressInput> getCNAddressRange();
+
+    public abstract List<TagAddressInput> getDXAddressRange();
+
+    public abstract List<TagAddressInput> getDYAddressRange();
+
+    public abstract List<TagAddressInput> getZAddressRange();
+
+    public abstract List<TagAddressInput> getRAddressRange();
+
+    public abstract List<TagAddressInput> getZRAddressRange();
 }

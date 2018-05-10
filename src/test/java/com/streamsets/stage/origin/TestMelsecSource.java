@@ -22,7 +22,10 @@ package com.streamsets.stage.origin;
 import com.streamsets.pipeline.api.Record;
 import com.streamsets.pipeline.sdk.SourceRunner;
 import com.streamsets.pipeline.sdk.StageRunner;
-import com.streamsets.stage.origin.menuconfig.*;
+import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
+import com.streamsets.stage.origin.menuconfig.MelsecDataType;
+import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
+import com.streamsets.stage.origin.menuconfig.TagAddressInput;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -34,11 +37,10 @@ public class TestMelsecSource {
     @Test
     public void testOrigin() throws Exception {
         TagAddressInput testDdata = new TagAddressInput();
-
         List<TagAddressInput> testDList = new ArrayList<>();
         testDdata.beginAddress = "000100";
         testDdata.endAddress = "000101";
-        testDdata.dataType = MelsecDataType.WORD;
+        testDdata.dataType = MelsecDataType.DWORD;
         testDList.add(testDdata);
 
         TagAddressInput testMdata = new TagAddressInput();
@@ -60,11 +62,11 @@ public class TestMelsecSource {
                 .addConfiguration("maxBlockSize", 256)
                 .addConfiguration("transferMode", false)
                 .addConfiguration("xAddress", false)
-                .addConfiguration("yAddress", true)
+                .addConfiguration("yAddress", false)
                 .addConfiguration("yAddressRange", testYList)
                 .addConfiguration("mAddress", false)
                 .addConfiguration("mAddressRange", testMList)
-                .addConfiguration("dAddress", false)
+                .addConfiguration("dAddress", true)
                 .addConfiguration("dAddressRange", testDList)
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)

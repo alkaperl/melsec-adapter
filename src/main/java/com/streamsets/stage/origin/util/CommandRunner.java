@@ -1,12 +1,13 @@
 package com.streamsets.stage.origin.util;
 
 import com.streamsets.pipeline.api.ErrorCode;
-import com.streamsets.pipeline.api.Field;
 import com.streamsets.pipeline.api.StageException;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CommandRunner {
     private String systemType;
@@ -306,13 +307,28 @@ public class CommandRunner {
             UdpConnector udpConnector = new UdpConnector(ip, port, timeOut);
             resultMsg = udpConnector.makeUDPConnect(byteCommand);
             resultLength = udpConnector.getLength();
-
         }
         else if (commType.equals("TCPIP")) {
             TcpConnector tcpConnector = new TcpConnector(ip,port, timeOut);
             resultMsg = tcpConnector.makeTCPConnect(byteCommand);
         }
+        //resultMSG 9&10 should be 0x00 0x00
+        assert resultMsg != null;
+        if (!(resultMsg[9] == 0x00) || !(resultMsg[10] == 0x00)) {
+            byte[] finalResultMsg = resultMsg;
+            ErrorCode errorCode = new ErrorCode() {
+                @Override
+                public String getCode() {
+                    return MelsecOriginConstants.ERROR_101;
+                }
 
+                @Override
+                public String getMessage() {
+                    return MelsecOriginConstants.ERROR_101_MESSAGE + finalResultMsg[10] + finalResultMsg[9];
+                }
+            };
+            throw new StageException(errorCode);
+        }
         return resultBuilder(resultMsg, resultLength);
     }
 
@@ -334,10 +350,6 @@ public class CommandRunner {
         return result.toString();
     }
 
-    private String increaseDecimal(String currentAddress) {
-        return String.valueOf(Long.parseLong(currentAddress) + 1);
-    }
-
     private String getFullMelsecAddress(String currentAddress) {
         StringBuilder fullAddress = new StringBuilder();
         fullAddress.append(getTagPrefix(tagType)).append(currentAddress);
@@ -356,26 +368,11 @@ public class CommandRunner {
         this.stationId = stationId;
         this.endAddress = endAddressString;
         /////////////////////////////////////////////////
-        Map<String, Integer> resultMap;
-        resultMap = readValueInByte(beginAddressString, endAddressString, blockSize);
-        return resultMap;
-    }
-
-    private Map <String, Integer> readValueInByte(String beginAddressString, String endAddressString, int blockSize) throws StageException {
         Map<String, Integer> resultMap = new HashMap<>();
         Map<String, Integer> tempMap;
         long beginAddress, endAddress;
-        //HEX value tags, each data address should read HEX  value
-        //if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
-          //      tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
-         //       tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
             beginAddress = Long.parseLong(beginAddressString);
             endAddress = Long.parseLong(this.endAddress);
-        //}
-        //else {//Decimal command count
-          //  beginAddress = Long.parseLong(Integer.toHexString(Integer.parseInt(beginAddressString)));
-          //  endAddress = Long.parseLong(Integer.toHexString(Integer.parseInt(endAddressString)));
-        //}
         long count = endAddress - beginAddress +1;
         if(count < 0) { count = 0; }
         int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
@@ -383,34 +380,22 @@ public class CommandRunner {
         int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
         currentAddress = beginAddressString;
         for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-            if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize); }
-            else { tempMap = singleBlockInByteCommand(blockRemain); }
+            if (i < blockCount) {
+                tempMap = singleBlockByteCommand(blockSize);
+            } else {
+                tempMap = singleBlockByteCommand(blockRemain);
+            }
             resultMap.putAll(tempMap);
         }
-
-
-            /*long count = endAddress - beginAddress +1;
-            if(count < 0) { count = 0; }
-            int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
-            int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
-            int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
-            currentAddress = beginAddressString;
-            for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-                if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize); }
-                else { tempMap = singleBlockInByteCommand(blockRemain); }
-                resultMap.putAll(tempMap);
-            }
-        }*/
         return resultMap;
     }
 
-    private Map<String, Integer> singleBlockInByteCommand(int blockSize) throws StageException {
+    private Map<String, Integer> singleBlockByteCommand(int blockSize) throws StageException {
         Map<String, Integer> resultMap=new HashMap<>();
         List<Integer> commandResult = sendInByteCommand(currentAddress, blockSize);
-
         int count = commandResult.size();
-        if(this.dataType.equals("DWORD")){
-            count = count-2;
+        if (this.dataType.equals("DWORD")) {
+            count = count - 2;
         }
         for (int iter=0; iter<count; iter++) {
             if (this.dataType.equals("BOOLEAN")) {
@@ -423,20 +408,17 @@ public class CommandRunner {
                 }
             }
             else if (this.dataType.equals("WORD")) {
-                int resultValue = commandResult.get(iter) + commandResult.get(iter++)*256;
+                int resultValue = commandResult.get(iter) + (commandResult.get(iter++) << 8);
                 resultMap.put(getFullMelsecAddress(currentAddress),resultValue);
             }
 
             else if (this.dataType.equals("DWORD")) {
-                int resultValue = commandResult.get(iter) + commandResult.get(iter++)*256+commandResult.get(iter++)*256*256+commandResult.get(iter++)*256*256*256;
+                int resultValue = commandResult.get(iter) + (commandResult.get(iter++) << 8) + (commandResult.get(iter++) << 16) + (commandResult.get(iter++) << 24);
                 if (resultValue < 0){ resultValue = resultValue + (int)Math.pow(2,31);}
                 resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
                  currentAddress = increaseAddress(currentAddress, 1);
-                //else { currentAddress = increaseDecimal(currentAddress); }
-
             }
-            //if (radix == 16) { currentAddress = increaseHex(currentAddress, 1); }
-            currentAddress = increaseDecimal(currentAddress);
+            currentAddress = increaseAddress(currentAddress, 1);
         }
         return resultMap;
     }

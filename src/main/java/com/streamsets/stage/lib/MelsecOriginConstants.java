@@ -43,6 +43,11 @@ public final class MelsecOriginConstants {
     public static final String ZRTAG_GROUP = "ZRTAG";
 
     ///descriptions
+    public static final String START_ADDRESS_DESC = "Specify input Start address, Make sure that format should fit HEX/DEC, Ex)D TAG in DEC, Y TAG in HEX";
+    public static final String END_ADDRESS_DESC = "Specify input end address, Make sure that format should fit HEX/DEC, Ex)D TAG in DEC, Y TAG in HEX, if blank, only one tag will be read";
+    public static final String STATION_ID_DESC = "Specified Station ID(HEX), will set FF or blank if read local Melsec CPU directly. \n For further information, follow Manual or PLC install report";
+    public static final String PLC_ID_DESC = "Specified PLC ID(HEX), will set 00 or blank if read local station directly. \n For further information, follow Manual or PLC install report";
+    public static final String NETWORK_ID_DESC = "Specified NETWORK ID(HEX), will set 00 or blank if read local device directly. \n For further information, follow Manual or PLC install report";
     public static final String TRANSFER_MODE_DESC = "If true, Transfer data only tag value changes. can save lots of dataflow";
     public static final String MELSEC_ORIGIN_DESC = "Mitsubishi PLC melsec data connector";
     public static final String IP_ADDR_DESC = "Set Mitsubishi PLC IP addrress (Default is 'localhost')";
@@ -82,8 +87,14 @@ public final class MelsecOriginConstants {
     public static final String PLC_RADDR_DESC = "Specify input R-Range Address for server can collect";
     public static final String PLC_ZRADDR_DESC = "Specify input ZR-Range Address for server can collect";
 
-    /////////////////LABEL
+    /////////////////LABELs
+    public static final String START_ADDRESS_LABEL = "Start Address(HEX/DEC)";
+    public static final String END_ADDRESS_LABEL = "End Address(HEX/DEC)(Optional)";
+    public static final String STATION_ID_LABEL = "Station ID(HEX)";
+    public static final String PLC_ID_LABEL = "PLC ID(HEX)";
+    public static final String NETWORK_ID_LABEL = "Network ID(HEX)";
     public static final String TRANSFER_MODE_LABEL = "Transfer Mode";
+    public static final String DATA_TYPE_LABEL = "Data Type";
     public static final String COMMTYPE_LABEL = "Communication Type";
     public static final String IP_ADDR_LABEL = "IP Address";
     public static final String PORT_LABEL = "Port";
@@ -121,7 +132,7 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZRADDR_LABEL = "Enable ZR Address";
 
     //option list
-    public static final String TCPIP = "TCPIP";
+    public static final String TCPIP = "TCP/IP";
     public static final String UDP = "UDP";
     //Data TYPE option
     public static final String BOOLEAN = "boolean(1Bit)";
@@ -177,6 +188,8 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZRADDR_HEXCODE = "B0";
 
     /////////////ERRORS
+    public static final String ERROR_101 = "101";
+    public static final String ERROR_101_MESSAGE = "Abnormal command result Check Address Range or Address structure(HEX/DEC):";
     public static final String ERROR_401 = "401";
     public static final String ERROR_401_MESSAGE = "UDP Connection Has failed. Check Melsec UDP port is opened or ping command reachable";
     public static final String ERROR_404 = "404";
