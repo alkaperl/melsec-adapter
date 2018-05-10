@@ -18,7 +18,30 @@ public final class MelsecOriginConstants {
     public static final String XTAG_GROUP = "XTAG";
     public static final String YTAG_GROUP = "YTAG";
     public static final String MTAG_GROUP = "MTAG";
+    public static final String LTAG_GROUP = "LTAG";
+    public static final String FTAG_GROUP = "FTAG";
+    public static final String VTAG_GROUP = "VTAG";
+    public static final String BTAG_GROUP = "BTAG";
     public static final String DTAG_GROUP = "DTAG";
+    public static final String WTAG_GROUP = "WTAG";
+    public static final String TSTAG_GROUP = "TSTAG";
+    public static final String TNTAG_GROUP = "TNTAG";
+    public static final String TCTAG_GROUP = "TCTAG";
+    public static final String SSTAG_GROUP = "SSTAG";
+    public static final String SCTAG_GROUP = "SCTAG";
+    public static final String SNTAG_GROUP = "SNTAG";
+    public static final String CSTAG_GROUP = "CSTAG";
+    public static final String CCTAG_GROUP = "CCTAG";
+    public static final String CNTAG_GROUP = "CNTAG";
+    public static final String SBTAG_GROUP = "SBTAG";
+    public static final String SWTAG_GROUP = "SWTAG";
+    public static final String STAG_GROUP = "STAG";
+    public static final String DXTAG_GROUP = "DXTAG";
+    public static final String DYTAG_GROUP = "DYTAG";
+    public static final String ZTAG_GROUP = "ZTAG";
+    public static final String RTAG_GROUP = "RTAG";
+    public static final String ZRTAG_GROUP = "ZRTAG";
+
     ///descriptions
     public static final String TRANSFER_MODE_DESC = "If true, Transfer data only tag value changes. can save lots of dataflow";
     public static final String MELSEC_ORIGIN_DESC = "Mitsubishi PLC melsec data connector";

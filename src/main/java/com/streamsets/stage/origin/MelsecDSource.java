@@ -179,7 +179,7 @@ public class MelsecDSource extends MelsecSource {
             triggeredByValue = "true"
     )
     @ListBeanModel
-    public List<TagHexAddressInput> xAddressRange;
+    public List<TagAddressInput> xAddressRange;
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -192,7 +192,7 @@ public class MelsecDSource extends MelsecSource {
             triggeredByValue = "true"
     )
     @ListBeanModel
-    public List<TagHexAddressInput> yAddressRange;
+    public List<TagAddressInput> yAddressRange;
 
     @ConfigDef(
             required = true,
@@ -206,7 +206,7 @@ public class MelsecDSource extends MelsecSource {
             triggeredByValue = "true"
     )
     @ListBeanModel
-    public List<TagHexAddressInput> mAddressRange;
+    public List<TagAddressInput> mAddressRange;
 
     @ConfigDef(
             required = true,
@@ -220,7 +220,7 @@ public class MelsecDSource extends MelsecSource {
             triggeredByValue = "true"
     )
     @ListBeanModel
-    public List<TagHexAddressInput> dAddressRange;
+    public List<TagAddressInput> dAddressRange;
 
     /**
      * {@inheritDoc}
@@ -281,15 +281,15 @@ public class MelsecDSource extends MelsecSource {
         return transferMode;
     }
     @Override
-    public List<TagHexAddressInput> getXAddressRange() {
+    public List<TagAddressInput> getXAddressRange() {
         return xAddressRange;
     }
     @Override
-    public List<TagHexAddressInput> getYAddressRange() {
+    public List<TagAddressInput> getYAddressRange() {
         return yAddressRange;
     }
     @Override
-    public List<TagHexAddressInput> getMAddressRange() { return mAddressRange; }
+    public List<TagAddressInput> getMAddressRange() { return mAddressRange; }
     @Override
-    public List<TagHexAddressInput> getDAddressRange() { return dAddressRange; }
+    public List<TagAddressInput> getDAddressRange() { return dAddressRange; }
 }

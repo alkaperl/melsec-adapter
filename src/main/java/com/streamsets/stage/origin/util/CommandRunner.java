@@ -192,10 +192,10 @@ public class CommandRunner {
         return result;
     }
 
-    private byte[] numberToByteArray(String hex, int radix) {
+    private byte[] numberToByteArray(String hex) {
         byte[] ba = new byte[hex.length() / 2];
         for (int i = 0; i < ba.length; i++) {
-            ba[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), radix);
+            ba[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
         }
         return ba;
     }
@@ -208,15 +208,15 @@ public class CommandRunner {
             switch (systemType) {
                 case "Q_SERIES":
                     byteCommand = new byte[]{0x50, 0x00,  //header for Q series
-                            numberToByteArray(networkId, 16)[0], numberToByteArray(plcId, 16)[0],//station number
+                            numberToByteArray(networkId)[0], numberToByteArray(plcId)[0],//station number
                             cpuLocationByte[1], cpuLocationByte[0],//CPULocation (big endian -> reversed low bit)
-                            numberToByteArray(stationId, 16)[0],//des. station number
+                            numberToByteArray(stationId)[0],//des. station number
                             0x0C, 0x00,//request length 요 뒤에 총 12개 바이트가 이ㅆ으(default value = 12(C))
                             MelsecOriginConstants.LOW_BYTE_CPU_TIMER, MelsecOriginConstants.HI_BYTE_CPU_TIMER,//cpu timer
                             0x01, 0x04,//Main command
                             subCommand[1], subCommand[0],//sub command(bits read or word read? word 01 00)
                             0x00, 0x00, 0x00,//default value 0
-                            numberToByteArray(tagType,16)[0],//D*
+                            numberToByteArray(tagType)[0],//D*
                             0x01,0x00};//1 point read(default 1)
                     break;
                 case "A_SERIES":
@@ -249,10 +249,20 @@ public class CommandRunner {
         return byteCommand;
     }
 
-    private List<Integer> sendInByteCommand(String address, long blockSize, int radix) throws StageException{
+    private List<Integer> sendInByteCommand(String address, long blockSize) throws StageException{
         byte byteCommand [] = getByteCommand();
         byte[] resultMsg = null;
-        byte[] addressByte = numberToByteArray(address, radix);
+        byte[] addressByte;
+        if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
+              tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+               tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
+            addressByte = numberToByteArray(address);
+        }
+        else {
+            StringBuilder addressString = new StringBuilder(Integer.toHexString(Integer.parseInt(address)));
+            while(addressString.length()<6){ addressString.insert(0, "0"); }
+            addressByte = numberToByteArray(addressString.toString());
+        }
         try {
             switch (systemType) {
                 case "Q_SERIES":
@@ -316,13 +326,11 @@ public class CommandRunner {
         return result;
     }
 
-    private String increaseHex(String currentAddress, int step) {
+    private String increaseAddress(String currentAddress, int step) {
         long addressNext = Long.parseLong(currentAddress, 16);
         addressNext = addressNext + step;
         StringBuilder result = new StringBuilder(Long.toHexString(addressNext));
-        while (result.length() < 6) {
-            result.insert(0, "0");
-        }
+        while (result.length() < 6) { result.insert(0, "0"); }
         return result.toString();
     }
 
@@ -358,46 +366,47 @@ public class CommandRunner {
         Map<String, Integer> tempMap;
         long beginAddress, endAddress;
         //HEX value tags, each data address should read HEX  value
-        if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
-                tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
-                tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
-            int radix = 16;
-            beginAddress = Long.parseLong(beginAddressString, radix);
-            endAddress = Long.parseLong(this.endAddress, radix);
-            long count = endAddress - beginAddress +1;
-            if(count < 0) { count = 0; }
-            int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
-            int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
-            int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
-            currentAddress = beginAddressString;
-            for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-                if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize, radix); }
-                else { tempMap = singleBlockInByteCommand(blockRemain,radix); }
-                resultMap.putAll(tempMap);
-            }
-        }
-        else {//Decimal command count
-            int radix = 10;
+        //if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
+          //      tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+         //       tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
             beginAddress = Long.parseLong(beginAddressString);
-            endAddress = Long.parseLong(endAddressString);
-            long count = endAddress - beginAddress +1;
+            endAddress = Long.parseLong(this.endAddress);
+        //}
+        //else {//Decimal command count
+          //  beginAddress = Long.parseLong(Integer.toHexString(Integer.parseInt(beginAddressString)));
+          //  endAddress = Long.parseLong(Integer.toHexString(Integer.parseInt(endAddressString)));
+        //}
+        long count = endAddress - beginAddress +1;
+        if(count < 0) { count = 0; }
+        int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
+        int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
+        int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
+        currentAddress = beginAddressString;
+        for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
+            if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize); }
+            else { tempMap = singleBlockInByteCommand(blockRemain); }
+            resultMap.putAll(tempMap);
+        }
+
+
+            /*long count = endAddress - beginAddress +1;
             if(count < 0) { count = 0; }
             int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
             int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
             int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
             currentAddress = beginAddressString;
             for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-                if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize, radix); }
-                else { tempMap = singleBlockInByteCommand(blockRemain, radix); }
+                if (i < blockCount) { tempMap = singleBlockInByteCommand(blockSize); }
+                else { tempMap = singleBlockInByteCommand(blockRemain); }
                 resultMap.putAll(tempMap);
             }
-        }
+        }*/
         return resultMap;
     }
 
-    private Map<String, Integer> singleBlockInByteCommand(int blockSize, int radix) throws StageException {
+    private Map<String, Integer> singleBlockInByteCommand(int blockSize) throws StageException {
         Map<String, Integer> resultMap=new HashMap<>();
-        List<Integer> commandResult = sendInByteCommand(currentAddress, blockSize, radix);
+        List<Integer> commandResult = sendInByteCommand(currentAddress, blockSize);
 
         int count = commandResult.size();
         if(this.dataType.equals("DWORD")){
@@ -422,12 +431,12 @@ public class CommandRunner {
                 int resultValue = commandResult.get(iter) + commandResult.get(iter++)*256+commandResult.get(iter++)*256*256+commandResult.get(iter++)*256*256*256;
                 if (resultValue < 0){ resultValue = resultValue + (int)Math.pow(2,31);}
                 resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
-                if (radix == 16) { currentAddress = increaseHex(currentAddress, 1); }
-                else { currentAddress = increaseDecimal(currentAddress); }
+                 currentAddress = increaseAddress(currentAddress, 1);
+                //else { currentAddress = increaseDecimal(currentAddress); }
 
             }
-            if (radix == 16) { currentAddress = increaseHex(currentAddress, 1); }
-            else { currentAddress = increaseDecimal(currentAddress); }
+            //if (radix == 16) { currentAddress = increaseHex(currentAddress, 1); }
+            currentAddress = increaseDecimal(currentAddress);
         }
         return resultMap;
     }

@@ -23,7 +23,6 @@ import com.streamsets.pipeline.api.Record;
 import com.streamsets.pipeline.sdk.SourceRunner;
 import com.streamsets.pipeline.sdk.StageRunner;
 import com.streamsets.stage.origin.menuconfig.*;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -34,30 +33,38 @@ public class TestMelsecSource {
 
     @Test
     public void testOrigin() throws Exception {
-        TagHexAddressInput testDdata = new TagHexAddressInput();
+        TagAddressInput testDdata = new TagAddressInput();
 
-        List<TagHexAddressInput> testDList = new ArrayList<>();
+        List<TagAddressInput> testDList = new ArrayList<>();
         testDdata.beginAddress = "000100";
         testDdata.endAddress = "000101";
-        testDdata.dataType = MelsecDataType.DWORD;
+        testDdata.dataType = MelsecDataType.WORD;
         testDList.add(testDdata);
 
-        TagHexAddressInput testMdata = new TagHexAddressInput();
-        List<TagHexAddressInput> testMList = new ArrayList<>();
-        testMdata.beginAddress = "000000";
+        TagAddressInput testMdata = new TagAddressInput();
+        List<TagAddressInput> testMList = new ArrayList<>();
+        testMdata.beginAddress = "000100";
         testMdata.endAddress = "000200";
         testMdata.dataType = MelsecDataType.BOOLEAN;
         testMList.add(testMdata);
+
+        TagAddressInput testYdata = new TagAddressInput();
+        List<TagAddressInput> testYList = new ArrayList<>();
+        testYdata.beginAddress = "000100";
+        testYdata.endAddress = "000200";
+        testYdata.dataType = MelsecDataType.BOOLEAN;
+        testYList.add(testYdata);
 
 
         SourceRunner runner = new SourceRunner.Builder(MelsecDSource.class)
                 .addConfiguration("maxBlockSize", 256)
                 .addConfiguration("transferMode", false)
                 .addConfiguration("xAddress", false)
-                .addConfiguration("yAddress", false)
+                .addConfiguration("yAddress", true)
+                .addConfiguration("yAddressRange", testYList)
                 .addConfiguration("mAddress", false)
                 .addConfiguration("mAddressRange", testMList)
-                .addConfiguration("dAddress", true)
+                .addConfiguration("dAddress", false)
                 .addConfiguration("dAddressRange", testDList)
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)

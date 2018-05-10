@@ -24,7 +24,7 @@ import com.streamsets.pipeline.api.base.BaseSource;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
 import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
-import com.streamsets.stage.origin.menuconfig.TagHexAddressInput;
+import com.streamsets.stage.origin.menuconfig.TagAddressInput;
 import com.streamsets.stage.origin.util.CommandRunner;
 
 import java.util.HashMap;
@@ -77,11 +77,11 @@ public abstract class MelsecSource extends BaseSource {
      * {@inheritDoc}
      */
 
-    private Map<String, Integer> executeCommand(List<TagHexAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
+    private Map<String, Integer> executeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         Map<String, Integer> resultMap = new HashMap<>();
         CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         long beginTime = System.currentTimeMillis();
-        for (TagHexAddressInput item : getPlcAddressRange) {
+        for (TagAddressInput item : getPlcAddressRange) {
             Map<String, Integer> tempMap;
             tempMap = commandRunner.readByteCommandResult(
                     item.getBeginAddress(), //begin Address
@@ -237,10 +237,10 @@ public abstract class MelsecSource extends BaseSource {
 
     public abstract boolean getTransferMode();
 
-    public abstract List<TagHexAddressInput> getXAddressRange();
-    public abstract List<TagHexAddressInput> getYAddressRange();
+    public abstract List<TagAddressInput> getXAddressRange();
+    public abstract List<TagAddressInput> getYAddressRange();
 
-    public abstract List<TagHexAddressInput> getMAddressRange();
+    public abstract List<TagAddressInput> getMAddressRange();
 
-    public abstract List<TagHexAddressInput> getDAddressRange();
+    public abstract List<TagAddressInput> getDAddressRange();
 }
