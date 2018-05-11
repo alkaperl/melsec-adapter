@@ -52,32 +52,82 @@ public abstract class MelsecSource extends BaseSource {
         // Validate configuration values and open any required resources.
         List<ConfigIssue> issues = super.init();
         lastResultRecord = new HashMap<>();
-        if(dAddressEnabled()) {
-            try { verifyAddressRangeCommand(getDAddressRange(), MelsecOriginConstants.PLC_DADDR_HEXCODE); }
-            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.DTAG.name(), "dAddressRange", Errors.ERROR_200, "Address format Fault")); }
-        }
         if(mAddressEnabled()) {
-            try { verifyAddressRangeCommand(getMAddressRange(), MelsecOriginConstants.PLC_MADDR_HEXCODE); }
-            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.MTAG.name(), "mAddressRange", Errors.ERROR_200, "Address format Fault")); }
+            try { verifyAddressRangeCommand(getMAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.MTAG.name(), "mAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
         }
-
-
+        if(lAddressEnabled()) {
+            try { verifyAddressRangeCommand(getLAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.LTAG.name(), "lAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(fAddressEnabled()) {
+            try { verifyAddressRangeCommand(getFAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.FTAG.name(), "fAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(vAddressEnabled()) {
+            try { verifyAddressRangeCommand(getVAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.VTAG.name(), "vAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(dAddressEnabled()) {
+            try { verifyAddressRangeCommand(getDAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.DTAG.name(), "dAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(tsAddressEnabled()) {
+            try { verifyAddressRangeCommand(getTSAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.TSTAG.name(), "tsAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(tnAddressEnabled()) {
+            try { verifyAddressRangeCommand(getTNAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.TNTAG.name(), "tnAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(tcAddressEnabled()) {
+            try { verifyAddressRangeCommand(getTCAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.TCTAG.name(), "tcAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(ssAddressEnabled()) {
+            try { verifyAddressRangeCommand(getSSAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.SSTAG.name(), "ssAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(snAddressEnabled()) {
+            try { verifyAddressRangeCommand(getSNAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.SNTAG.name(), "snAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(scAddressEnabled()) {
+            try { verifyAddressRangeCommand(getSCAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.SCTAG.name(), "scAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(csAddressEnabled()) {
+            try { verifyAddressRangeCommand(getCSAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.CSTAG.name(), "csAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(cnAddressEnabled()) {
+            try { verifyAddressRangeCommand(getCNAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.CNTAG.name(), "cnAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(ccAddressEnabled()) {
+            try { verifyAddressRangeCommand(getCCAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.CCTAG.name(), "ccAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(sAddressEnabled()) {
+            try { verifyAddressRangeCommand(getSAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.STAG.name(), "sAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(zAddressEnabled()) {
+            try { verifyAddressRangeCommand(getZAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.ZTAG.name(), "zAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
+        if(rAddressEnabled()) {
+            try { verifyAddressRangeCommand(getRAddressRange()); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.RTAG.name(), "rAddressRange", Errors.ERROR_200, MelsecOriginConstants.NUMBER_FORMAT_ERROR_MSG)); }
+        }
         return issues;
     }
-    private void verifyAddressRangeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) {
+    private void verifyAddressRangeCommand(List<TagAddressInput> getPlcAddressRange) {
         for (TagAddressInput item : getPlcAddressRange) {
-            if (plcAddrHexCode.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || plcAddrHexCode.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
-                    plcAddrHexCode.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
-                    plcAddrHexCode.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
-                //item.getBeginAddress(); //begin Address
-                //item.getEndAddress();  //endAddress
-            }
-            else {
-                try {
-                    Integer.parseInt(item.getBeginAddress());
-                    Integer.parseInt(item.getEndAddress());
-                } catch (NumberFormatException e){ throw new NumberFormatException(); }
-            }
+            try {
+                Integer.parseInt(item.getBeginAddress());
+                Integer.parseInt(item.getEndAddress());
+            } catch (NumberFormatException e){ throw new NumberFormatException(); }
         }
     }
 

@@ -186,4 +186,6 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZADDR_HEXCODE = "CC";
     public static final String PLC_RADDR_HEXCODE = "AF";
     public static final String PLC_ZRADDR_HEXCODE = "B0";
+
+    public static final String NUMBER_FORMAT_ERROR_MSG = "Address format Fault!";
 }
