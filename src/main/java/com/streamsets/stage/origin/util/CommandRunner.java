@@ -196,9 +196,7 @@ public class CommandRunner {
 
     private byte[] numberToByteArray(String hex) {
         byte[] ba = new byte[hex.length() / 2];
-        for (int i = 0; i < ba.length; i++) {
-            ba[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
-        }
+        for (int i = 0; i < ba.length; i++) { ba[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16); }
         return ba;
     }
 
@@ -240,7 +238,6 @@ public class CommandRunner {
                 public String getCode() {
                     return MelsecOriginConstants.ERROR_501;
                 }
-
                 @Override
                 public String getMessage() {
                     return MelsecOriginConstants.ERROR_501_MESSAGE;
@@ -294,7 +291,6 @@ public class CommandRunner {
                 public String getCode() {
                     return MelsecOriginConstants.ERROR_500;
                 }
-
                 @Override
                 public String getMessage() {
                     return MelsecOriginConstants.ERROR_500_MESSAGE;
@@ -321,11 +317,8 @@ public class CommandRunner {
                 public String getCode() {
                     return MelsecOriginConstants.ERROR_101;
                 }
-
                 @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_101_MESSAGE + finalResultMsg[10] + finalResultMsg[9];
-                }
+                public String getMessage() { return MelsecOriginConstants.ERROR_101_MESSAGE + finalResultMsg[10] + finalResultMsg[9]; }
             };
             throw new StageException(errorCode);
         }
@@ -387,11 +380,8 @@ public class CommandRunner {
         int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
         currentAddress = beginAddressString;
         for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-            if (i < blockCount) {
-                tempMap = singleBlockByteCommand(blockSize);
-            } else {
-                tempMap = singleBlockByteCommand(blockRemain);
-            }
+            if (i < blockCount) { tempMap = singleBlockByteCommand(blockSize); }
+            else { tempMap = singleBlockByteCommand(blockRemain); }
             resultMap.putAll(tempMap);
         }
         return resultMap;
@@ -411,9 +401,7 @@ public class CommandRunner {
                         for (int k = 0; k < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; k++) {
                             String returnValue = returnBinaryValue(commandResult.get(iter));
                             resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - k, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - k)));
-                            if (currentAddress.equalsIgnoreCase(this.endAddress)) {
-                                return resultMap;
-                            }//return value no other choice until 20180510
+                            if (currentAddress.equalsIgnoreCase(this.endAddress)) { return resultMap; }//return value no other choice until 20180510
                             currentAddress = increaseAddress(currentAddress, 1);
                         }
                         iter++;
@@ -427,9 +415,7 @@ public class CommandRunner {
                 }
                 case "DWORD": {
                     int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
-                    if (resultValue < 0) {
-                        resultValue = resultValue + (int) Math.pow(2, 31);
-                    }
+                    if (resultValue < 0) { resultValue = resultValue + (int) Math.pow(2, 31); }
                     resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
                     currentAddress = increaseAddress(currentAddress, 1);
                     break;

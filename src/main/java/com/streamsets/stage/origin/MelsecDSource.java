@@ -37,7 +37,6 @@ import java.util.List;
 @ConfigGroups(value = Groups.class)
 
 @GenerateResourceBundle
-
 public class MelsecDSource extends MelsecSource {
 
     @ConfigDef(
@@ -432,7 +431,7 @@ public class MelsecDSource extends MelsecSource {
             required = true,
             type = ConfigDef.Type.MODEL,
             defaultValue = "",
-            label = MelsecOriginConstants.PLC_DADDR_LABEL,
+            label = "",
             description = MelsecOriginConstants.PLC_DADDR_DESC,
             displayPosition = 210,
             group = MelsecOriginConstants.DTAG_GROUP,
@@ -449,7 +448,7 @@ public class MelsecDSource extends MelsecSource {
             description = MelsecOriginConstants.PLC_LADDR_DESC,
             displayPosition = 210,
             group = MelsecOriginConstants.FTAG_GROUP,
-            dependsOn = "lAddress",
+            dependsOn = "fAddress",
             triggeredByValue = "true"
     )
     @ListBeanModel
@@ -776,101 +775,51 @@ public class MelsecDSource extends MelsecSource {
         return mAddress;
     }
     @Override
-    public boolean dAddressEnabled() {
-        return dAddress;
-    }
+    public boolean dAddressEnabled() { return dAddress; }
     @Override
-    public boolean lAddressEnabled() {
-        return lAddress;
-    }
+    public boolean lAddressEnabled() { return lAddress; }
     @Override
-    public boolean fAddressEnabled() {
-        return fAddress;
-    }
+    public boolean fAddressEnabled() { return fAddress; }
     @Override
-    public boolean vAddressEnabled() {
-        return vAddress;
-    }
+    public boolean vAddressEnabled() { return vAddress; }
     @Override
-    public boolean bAddressEnabled() {
-        return bAddress;
-    }
+    public boolean bAddressEnabled() { return bAddress; }
     @Override
-    public boolean wAddressEnabled() {
-        return wAddress;
-    }
+    public boolean wAddressEnabled() { return wAddress; }
     @Override
-    public boolean tsAddressEnabled() {
-        return tsAddress;
-    }
+    public boolean tsAddressEnabled() { return tsAddress; }
     @Override
-    public boolean tcAddressEnabled() {
-        return tcAddress;
-    }
+    public boolean tcAddressEnabled() { return tcAddress; }
     @Override
-    public boolean tnAddressEnabled() {
-        return tnAddress;
-    }
+    public boolean tnAddressEnabled() { return tnAddress; }
     @Override
-    public boolean ssAddressEnabled() {
-        return ssAddress;
-    }
+    public boolean ssAddressEnabled() { return ssAddress; }
     @Override
-    public boolean scAddressEnabled() {
-        return scAddress;
-    }
+    public boolean scAddressEnabled() { return scAddress; }
     @Override
-    public boolean snAddressEnabled() {
-        return snAddress;
-    }
+    public boolean snAddressEnabled() { return snAddress; }
     @Override
-    public boolean csAddressEnabled() {
-        return csAddress;
-    }
+    public boolean csAddressEnabled() { return csAddress; }
     @Override
-    public boolean ccAddressEnabled() {
-        return ccAddress;
-    }
+    public boolean ccAddressEnabled() { return ccAddress; }
     @Override
-    public boolean cnAddressEnabled() {
-        return cnAddress;
-    }
+    public boolean cnAddressEnabled() { return cnAddress; }
     @Override
-    public boolean sbAddressEnabled() {
-        return sbAddress;
-    }
+    public boolean sbAddressEnabled() { return sbAddress; }
     @Override
-    public boolean swAddressEnabled() {
-        return swAddress;
-    }
+    public boolean swAddressEnabled() { return swAddress; }
     @Override
-    public boolean sAddressEnabled() {
-        return sAddress;
-    }
+    public boolean sAddressEnabled() { return sAddress; }
     @Override
-    public boolean dxAddressEnabled() {
-        return dxAddress;
-    }
-
+    public boolean dxAddressEnabled() { return dxAddress; }
     @Override
-    public boolean dyAddressEnabled() {
-        return dyAddress;
-    }
-
+    public boolean dyAddressEnabled() { return dyAddress; }
     @Override
-    public boolean zAddressEnabled() {
-        return zAddress;
-    }
-
+    public boolean zAddressEnabled() { return zAddress; }
     @Override
-    public boolean rAddressEnabled() {
-        return rAddress;
-    }
-
+    public boolean rAddressEnabled() { return rAddress; }
     @Override
-    public boolean zrAddressEnabled() {
-        return zrAddress;
-    }
+    public boolean zrAddressEnabled() { return zrAddress;}
     @Override
     public List<TagAddressInput> getXAddressRange() {
         return xAddressRange;
@@ -892,18 +841,11 @@ public class MelsecDSource extends MelsecSource {
         return fAddressRange;
     }
     @Override
-    public List<TagAddressInput> getVAddressRange() {
-        return vAddressRange;
-    }
+    public List<TagAddressInput> getVAddressRange() { return vAddressRange; }
     @Override
-    public List<TagAddressInput> getBAddressRange() {
-        return bAddressRange;
-    }
-
+    public List<TagAddressInput> getBAddressRange() { return bAddressRange; }
     @Override
-    public List<TagAddressInput> getWAddressRange() {
-        return wAddressRange;
-    }
+    public List<TagAddressInput> getWAddressRange() { return wAddressRange; }
     @Override
     public List<TagAddressInput> getTSAddressRange() {
         return tsAddressRange;
@@ -913,13 +855,9 @@ public class MelsecDSource extends MelsecSource {
         return tcAddressRange;
     }
     @Override
-    public List<TagAddressInput> getTNAddressRange() {
-        return tnAddressRange;
-    }
+    public List<TagAddressInput> getTNAddressRange() { return tnAddressRange; }
     @Override
-    public List<TagAddressInput> getSSAddressRange() {
-        return ssAddressRange;
-    }
+    public List<TagAddressInput> getSSAddressRange() { return ssAddressRange; }
     @Override
     public List<TagAddressInput> getSCAddressRange() {
         return scAddressRange;
@@ -929,28 +867,21 @@ public class MelsecDSource extends MelsecSource {
         return snAddressRange;
     }
     @Override
-    public List<TagAddressInput> getCSAddressRange() {
-        return csAddressRange;
-    }
+    public List<TagAddressInput> getCSAddressRange() { return csAddressRange; }
     @Override
-    public List<TagAddressInput> getCCAddressRange() {
-        return ccAddressRange;
-    }
+    public List<TagAddressInput> getCCAddressRange() { return ccAddressRange; }
     @Override
     public List<TagAddressInput> getCNAddressRange() {
         return cnAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSAddressRange() {
         return sAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSWAddressRange() {
         return swAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSBAddressRange() {
         return sbAddressRange;
@@ -960,13 +891,9 @@ public class MelsecDSource extends MelsecSource {
         return dxAddressRange;
     }
     @Override
-    public List<TagAddressInput> getDYAddressRange() {
-        return dyAddressRange;
-    }
+    public List<TagAddressInput> getDYAddressRange() { return dyAddressRange; }
     @Override
-    public List<TagAddressInput> getZAddressRange() {
-        return zAddressRange;
-    }
+    public List<TagAddressInput> getZAddressRange() { return zAddressRange; }
     @Override
     public List<TagAddressInput> getRAddressRange() {
         return rAddressRange;

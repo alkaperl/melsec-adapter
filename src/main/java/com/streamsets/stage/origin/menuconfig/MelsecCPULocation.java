@@ -1,8 +1,10 @@
 package com.streamsets.stage.origin.menuconfig;
 
+import com.streamsets.pipeline.api.GenerateResourceBundle;
 import com.streamsets.pipeline.api.Label;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
+@GenerateResourceBundle
 public enum MelsecCPULocation implements Label {
     CPULOCAL(MelsecOriginConstants.CPU_LOCAL),
     CPUCONTROL(MelsecOriginConstants.CPU_CONTROL),
