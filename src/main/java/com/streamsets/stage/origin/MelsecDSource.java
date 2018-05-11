@@ -201,6 +201,16 @@ public class MelsecDSource extends MelsecSource {
             required = true,
             type = ConfigDef.Type.BOOLEAN,
             defaultValue = "false",
+            label = MelsecOriginConstants.PLC_BADDR_LABEL,
+            description = MelsecOriginConstants.PLC_BADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean bAddress;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
             label = MelsecOriginConstants.PLC_WADDR_LABEL,
             description = MelsecOriginConstants.PLC_WADDR_DESC,
             displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
@@ -301,6 +311,36 @@ public class MelsecDSource extends MelsecSource {
             required = true,
             type = ConfigDef.Type.BOOLEAN,
             defaultValue = "false",
+            label = MelsecOriginConstants.PLC_SBADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SBADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean sbAddress;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
+            label = MelsecOriginConstants.PLC_SWADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SWADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean swAddress;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
+            label = MelsecOriginConstants.PLC_SADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SADDR_DESC,
+            displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
+            group = MelsecOriginConstants.BASIC_GROUP
+    )
+    public boolean sAddress;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.BOOLEAN,
+            defaultValue = "false",
             label = MelsecOriginConstants.PLC_DXADDR_LABEL,
             description = MelsecOriginConstants.PLC_DXADDR_DESC,
             displayPosition = MelsecOriginConstants.UI_DEFAULT_LOCATION,
@@ -347,8 +387,6 @@ public class MelsecDSource extends MelsecSource {
             group = MelsecOriginConstants.BASIC_GROUP
     )
     public boolean zrAddress;
-
-
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -423,7 +461,7 @@ public class MelsecDSource extends MelsecSource {
             label = MelsecOriginConstants.PLC_FADDR_LABEL,
             description = MelsecOriginConstants.PLC_FADDR_DESC,
             displayPosition = 210,
-            group = MelsecOriginConstants.FTAG_GROUP,
+            group = MelsecOriginConstants.LTAG_GROUP,
             dependsOn = "lAddress",
             triggeredByValue = "true"
     )
@@ -443,6 +481,19 @@ public class MelsecDSource extends MelsecSource {
     )
     @ListBeanModel
     public List<TagAddressInput> vAddressRange;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = MelsecOriginConstants.PLC_BADDR_LABEL,
+            description = MelsecOriginConstants.PLC_BADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.BTAG_GROUP,
+            dependsOn = "bAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagAddressInput> bAddressRange;
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -565,7 +616,7 @@ public class MelsecDSource extends MelsecSource {
             type = ConfigDef.Type.MODEL,
             defaultValue = "",
             label = MelsecOriginConstants.PLC_CNADDR_LABEL,
-            description = MelsecOriginConstants.PLC_CADDR_DESC,
+            description = MelsecOriginConstants.PLC_CNADDR_DESC,
             displayPosition = 210,
             group = MelsecOriginConstants.CNTAG_GROUP,
             dependsOn = "cnAddress",
@@ -573,6 +624,45 @@ public class MelsecDSource extends MelsecSource {
     )
     @ListBeanModel
     public List<TagAddressInput> cnAddressRange;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = MelsecOriginConstants.PLC_SADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.STAG_GROUP,
+            dependsOn = "sAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagAddressInput> sAddressRange;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = MelsecOriginConstants.PLC_SBADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SBADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.SBTAG_GROUP,
+            dependsOn = "sbAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagAddressInput> sbAddressRange;
+    @ConfigDef(
+            required = true,
+            type = ConfigDef.Type.MODEL,
+            defaultValue = "",
+            label = MelsecOriginConstants.PLC_SWADDR_LABEL,
+            description = MelsecOriginConstants.PLC_SWADDR_DESC,
+            displayPosition = 210,
+            group = MelsecOriginConstants.SWTAG_GROUP,
+            dependsOn = "swAddress",
+            triggeredByValue = "true"
+    )
+    @ListBeanModel
+    public List<TagAddressInput> swAddressRange;
     @ConfigDef(
             required = true,
             type = ConfigDef.Type.MODEL,
@@ -657,27 +747,22 @@ public class MelsecDSource extends MelsecSource {
     public MelsecSystemType getSystemType() {
         return systemType;
     }
-
     @Override
     public int getTimeOut() {
         return timeOut;
     }
-
     @Override
     public int getTimeInterval() {
         return timeInterval;
     }
-
     @Override
     public int getMaxBlockSize() {
         return maxBlockSize;
     }
-
     @Override
     public boolean getTransferMode() {
         return transferMode;
     }
-
     @Override
     public boolean xAddressEnabled() {
         return xAddress;
@@ -694,52 +779,46 @@ public class MelsecDSource extends MelsecSource {
     public boolean dAddressEnabled() {
         return dAddress;
     }
-
     @Override
     public boolean lAddressEnabled() {
         return lAddress;
     }
-
     @Override
     public boolean fAddressEnabled() {
         return fAddress;
     }
-
     @Override
     public boolean vAddressEnabled() {
         return vAddress;
     }
-
+    @Override
+    public boolean bAddressEnabled() {
+        return bAddress;
+    }
     @Override
     public boolean wAddressEnabled() {
         return wAddress;
     }
-
     @Override
     public boolean tsAddressEnabled() {
         return tsAddress;
     }
-
     @Override
     public boolean tcAddressEnabled() {
         return tcAddress;
     }
-
     @Override
     public boolean tnAddressEnabled() {
         return tnAddress;
     }
-
     @Override
     public boolean ssAddressEnabled() {
         return ssAddress;
     }
-
     @Override
     public boolean scAddressEnabled() {
         return scAddress;
     }
-
     @Override
     public boolean snAddressEnabled() {
         return snAddress;
@@ -755,6 +834,18 @@ public class MelsecDSource extends MelsecSource {
     @Override
     public boolean cnAddressEnabled() {
         return cnAddress;
+    }
+    @Override
+    public boolean sbAddressEnabled() {
+        return sbAddress;
+    }
+    @Override
+    public boolean swAddressEnabled() {
+        return swAddress;
+    }
+    @Override
+    public boolean sAddressEnabled() {
+        return sAddress;
     }
     @Override
     public boolean dxAddressEnabled() {
@@ -792,92 +883,94 @@ public class MelsecDSource extends MelsecSource {
     public List<TagAddressInput> getMAddressRange() { return mAddressRange; }
     @Override
     public List<TagAddressInput> getDAddressRange() { return dAddressRange; }
-
     @Override
     public List<TagAddressInput> getLAddressRange() {
         return lAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getFAddressRange() {
         return fAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getVAddressRange() {
         return vAddressRange;
+    }
+    @Override
+    public List<TagAddressInput> getBAddressRange() {
+        return bAddressRange;
     }
 
     @Override
     public List<TagAddressInput> getWAddressRange() {
         return wAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getTSAddressRange() {
         return tsAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getTCAddressRange() {
         return tcAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getTNAddressRange() {
         return tnAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSSAddressRange() {
         return ssAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSCAddressRange() {
         return scAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getSNAddressRange() {
         return snAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getCSAddressRange() {
         return csAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getCCAddressRange() {
         return ccAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getCNAddressRange() {
         return cnAddressRange;
     }
 
     @Override
+    public List<TagAddressInput> getSAddressRange() {
+        return sAddressRange;
+    }
+
+    @Override
+    public List<TagAddressInput> getSWAddressRange() {
+        return swAddressRange;
+    }
+
+    @Override
+    public List<TagAddressInput> getSBAddressRange() {
+        return sbAddressRange;
+    }
+    @Override
     public List<TagAddressInput> getDXAddressRange() {
         return dxAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getDYAddressRange() {
         return dyAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getZAddressRange() {
         return zAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getRAddressRange() {
         return rAddressRange;
     }
-
     @Override
     public List<TagAddressInput> getZRAddressRange() {
         return zrAddressRange;

@@ -130,6 +130,9 @@ public abstract class MelsecSource extends BaseSource {
             if (vAddressEnabled()) {
                 currentResultRecord.putAll(executeCommand(getVAddressRange(), MelsecOriginConstants.PLC_VADDR_HEXCODE));
             }
+            if (bAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getBAddressRange(), MelsecOriginConstants.PLC_BADDR_HEXCODE));
+            }
             if (wAddressEnabled()) {
                 currentResultRecord.putAll(executeCommand(getWAddressRange(), MelsecOriginConstants.PLC_WADDR_HEXCODE));
             }
@@ -159,6 +162,15 @@ public abstract class MelsecSource extends BaseSource {
             }
             if (cnAddressEnabled()) {
                 currentResultRecord.putAll(executeCommand(getCNAddressRange(), MelsecOriginConstants.PLC_CNADDR_HEXCODE));
+            }
+            if (sbAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSBAddressRange(), MelsecOriginConstants.PLC_SBADDR_HEXCODE));
+            }
+            if (swAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSWAddressRange(), MelsecOriginConstants.PLC_SWADDR_HEXCODE));
+            }
+            if (sAddressEnabled()) {
+                currentResultRecord.putAll(executeCommand(getSAddressRange(), MelsecOriginConstants.PLC_SADDR_HEXCODE));
             }
             if (dxAddressEnabled()) {
                 currentResultRecord.putAll(executeCommand(getDXAddressRange(), MelsecOriginConstants.PLC_DXADDR_HEXCODE));
@@ -248,22 +260,19 @@ public abstract class MelsecSource extends BaseSource {
     public abstract String getIpAddress();
     public abstract int getPort();
     public abstract MelsecSystemType getSystemType();
-
     public abstract int getTimeOut();
-
     public abstract int getTimeInterval();
-
     public abstract int getMaxBlockSize();
-
     public abstract boolean getTransferMode();
     public abstract boolean xAddressEnabled();
     public abstract boolean yAddressEnabled();
     public abstract boolean mAddressEnabled();
     public abstract boolean dAddressEnabled();
-
     public abstract boolean lAddressEnabled();
     public abstract boolean fAddressEnabled();
     public abstract boolean vAddressEnabled();
+
+    public abstract boolean bAddressEnabled();
     public abstract boolean wAddressEnabled();
     public abstract boolean tsAddressEnabled();
     public abstract boolean tcAddressEnabled();
@@ -274,51 +283,45 @@ public abstract class MelsecSource extends BaseSource {
     public abstract boolean csAddressEnabled();
     public abstract boolean ccAddressEnabled();
     public abstract boolean cnAddressEnabled();
+
+    public abstract boolean sbAddressEnabled();
+
+    public abstract boolean swAddressEnabled();
+
+    public abstract boolean sAddressEnabled();
     public abstract boolean dxAddressEnabled();
     public abstract boolean dyAddressEnabled();
-
     public abstract boolean zAddressEnabled();
     public abstract boolean rAddressEnabled();
-
     public abstract boolean zrAddressEnabled();
     public abstract List<TagAddressInput> getXAddressRange();
     public abstract List<TagAddressInput> getYAddressRange();
     public abstract List<TagAddressInput> getMAddressRange();
     public abstract List<TagAddressInput> getDAddressRange();
-
     public abstract List<TagAddressInput> getLAddressRange();
-
     public abstract List<TagAddressInput> getFAddressRange();
-
     public abstract List<TagAddressInput> getVAddressRange();
 
+    public abstract List<TagAddressInput> getBAddressRange();
     public abstract List<TagAddressInput> getWAddressRange();
-
     public abstract List<TagAddressInput> getTSAddressRange();
-
     public abstract List<TagAddressInput> getTCAddressRange();
-
     public abstract List<TagAddressInput> getTNAddressRange();
-
     public abstract List<TagAddressInput> getSSAddressRange();
-
     public abstract List<TagAddressInput> getSCAddressRange();
-
     public abstract List<TagAddressInput> getSNAddressRange();
-
     public abstract List<TagAddressInput> getCSAddressRange();
-
     public abstract List<TagAddressInput> getCCAddressRange();
-
     public abstract List<TagAddressInput> getCNAddressRange();
 
+    public abstract List<TagAddressInput> getSAddressRange();
+
+    public abstract List<TagAddressInput> getSWAddressRange();
+
+    public abstract List<TagAddressInput> getSBAddressRange();
     public abstract List<TagAddressInput> getDXAddressRange();
-
     public abstract List<TagAddressInput> getDYAddressRange();
-
     public abstract List<TagAddressInput> getZAddressRange();
-
     public abstract List<TagAddressInput> getRAddressRange();
-
     public abstract List<TagAddressInput> getZRAddressRange();
 }

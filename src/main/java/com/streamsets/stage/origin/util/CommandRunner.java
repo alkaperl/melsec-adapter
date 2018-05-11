@@ -111,7 +111,6 @@ public class CommandRunner {
 
     private String getTagPrefix(String tagType) {
         String result = "";
-
             switch (tagType) {
                 case MelsecOriginConstants.PLC_XADDR_HEXCODE:
                     result = "X";
@@ -173,6 +172,9 @@ public class CommandRunner {
                 case MelsecOriginConstants.PLC_SWADDR_HEXCODE:
                     result = "SW";
                     break;
+                case MelsecOriginConstants.PLC_SADDR_HEXCODE:
+                    result = "S";
+                    break;
                 case MelsecOriginConstants.PLC_DXADDR_HEXCODE:
                     result = "DX";
                     break;
@@ -188,7 +190,6 @@ public class CommandRunner {
                 case MelsecOriginConstants.PLC_ZRADDR_HEXCODE:
                     result = "ZR";
                     break;
-
         }
         return result;
     }
@@ -266,11 +267,10 @@ public class CommandRunner {
         }
         try {
             switch (systemType) {
-                case "Q_SERIES":
+                case "Q_SERIES"://set proper address regarding HEX / DEC address structure
                     byteCommand[15] = addressByte[2];
                     byteCommand[16] = addressByte[1];
                     byteCommand[17] = addressByte[0];
-                    //TODO UDP connector making
                     break;
                 case "A_SERIES":
                     break;
@@ -371,8 +371,15 @@ public class CommandRunner {
         Map<String, Integer> resultMap = new HashMap<>();
         Map<String, Integer> tempMap;
         long beginAddress, endAddress;
+        if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
+            beginAddress = Long.parseLong(beginAddressString, 16);
+            endAddress = Long.parseLong(this.endAddress, 16);
+        } else {
             beginAddress = Long.parseLong(beginAddressString);
             endAddress = Long.parseLong(this.endAddress);
+        }
         long count = endAddress - beginAddress +1;
         if(count < 0) { count = 0; }
         int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
@@ -398,25 +405,35 @@ public class CommandRunner {
             count = count - 2;
         }
         for (int iter=0; iter<count; iter++) {
-            if (this.dataType.equals("BOOLEAN")) {
-                for (int i = 0; i < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; i++) {
-                    String returnValue = returnBinaryValue(commandResult.get(iter));
-                    resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(15 - i, 16 - i)));
-                    if (currentAddress.equalsIgnoreCase(this.endAddress)) {
-                        break;
+            switch (this.dataType) {
+                case "BOOLEAN":
+                    for (int j = 0; j < 2; j++) {
+                        for (int k = 0; k < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; k++) {
+                            String returnValue = returnBinaryValue(commandResult.get(iter));
+                            resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - k, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - k)));
+                            if (currentAddress.equalsIgnoreCase(this.endAddress)) {
+                                return resultMap;
+                            }//return value no other choice until 20180510
+                            currentAddress = increaseAddress(currentAddress, 1);
+                        }
+                        iter++;
                     }
+                    break;
+                case "WORD": {
+                    int resultValue = commandResult.get(iter);
+                    resultValue += (commandResult.get(++iter) << 8);
+                    resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
+                    break;
                 }
-            }
-            else if (this.dataType.equals("WORD")) {
-                int resultValue = commandResult.get(iter) + (commandResult.get(iter++) << 8);
-                resultMap.put(getFullMelsecAddress(currentAddress),resultValue);
-            }
-
-            else if (this.dataType.equals("DWORD")) {
-                int resultValue = commandResult.get(iter) + (commandResult.get(iter++) << 8) + (commandResult.get(iter++) << 16) + (commandResult.get(iter++) << 24);
-                if (resultValue < 0){ resultValue = resultValue + (int)Math.pow(2,31);}
-                resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
-                 currentAddress = increaseAddress(currentAddress, 1);
+                case "DWORD": {
+                    int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
+                    if (resultValue < 0) {
+                        resultValue = resultValue + (int) Math.pow(2, 31);
+                    }
+                    resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
+                    currentAddress = increaseAddress(currentAddress, 1);
+                    break;
+                }
             }
             currentAddress = increaseAddress(currentAddress, 1);
         }
@@ -424,7 +441,7 @@ public class CommandRunner {
     }
     private String returnBinaryValue (Integer itemValue){
         StringBuilder returnValue = new StringBuilder(Integer.toBinaryString(itemValue));
-        while (returnValue.length()< MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY){
+        while (returnValue.length() < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY) {
             returnValue.insert(0, "0");
         }
         return returnValue.toString();

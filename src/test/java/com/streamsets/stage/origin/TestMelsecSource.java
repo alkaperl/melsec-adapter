@@ -39,21 +39,21 @@ public class TestMelsecSource {
         TagAddressInput testDdata = new TagAddressInput();
         List<TagAddressInput> testDList = new ArrayList<>();
         testDdata.beginAddress = "000100";
-        testDdata.endAddress = "000101";
+        testDdata.endAddress = "000102";
         testDdata.dataType = MelsecDataType.DWORD;
         testDList.add(testDdata);
 
         TagAddressInput testMdata = new TagAddressInput();
         List<TagAddressInput> testMList = new ArrayList<>();
         testMdata.beginAddress = "000100";
-        testMdata.endAddress = "000200";
+        testMdata.endAddress = "000102";
         testMdata.dataType = MelsecDataType.BOOLEAN;
         testMList.add(testMdata);
 
         TagAddressInput testYdata = new TagAddressInput();
         List<TagAddressInput> testYList = new ArrayList<>();
-        testYdata.beginAddress = "000100";
-        testYdata.endAddress = "000200";
+        testYdata.beginAddress = "000000";
+        testYdata.endAddress = "000000F";
         testYdata.dataType = MelsecDataType.BOOLEAN;
         testYList.add(testYdata);
 
@@ -68,10 +68,33 @@ public class TestMelsecSource {
                 .addConfiguration("mAddressRange", testMList)
                 .addConfiguration("dAddress", true)
                 .addConfiguration("dAddressRange", testDList)
+                .addConfiguration("wAddress", false)
+                .addConfiguration("cnAddress", false)
+                .addConfiguration("csAddress", false)
+                .addConfiguration("ssAddress", false)
+                .addConfiguration("vAddress", false)
+                .addConfiguration("zAddress", false)
+                .addConfiguration("tnAddress", false)
+                .addConfiguration("swAddress", false)
+                .addConfiguration("tsAddress", false)
+                .addConfiguration("snAddress", false)
+                .addConfiguration("dxAddress", false)
+                .addConfiguration("tcAddress", false)
+                .addConfiguration("ccAddress", false)
+                .addConfiguration("sbAddress", false)
+                .addConfiguration("fAddress", false)
+                .addConfiguration("scAddress", false)
+                .addConfiguration("snAddress", false)
+                .addConfiguration("bAddress", false)
+                .addConfiguration("dyAddress", false)
+                .addConfiguration("lAddress", false)
+                .addConfiguration("zrAddress", false)
+                .addConfiguration("rAddress", false)
+                .addConfiguration("sAddress", false)
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)
                 .addConfiguration("port", 5000)
-                .addConfiguration("commType", MelsecCommtype.UDP)
+                .addConfiguration("commType", MelsecCommtype.TCPIP)
                 .addConfiguration("systemType", MelsecSystemType.Q_SERIES)
                 .addConfiguration("ipAddress", "127.0.0.1")
                 .addOutputLane("lane")

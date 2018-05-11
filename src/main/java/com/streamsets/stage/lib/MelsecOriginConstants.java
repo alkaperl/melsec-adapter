@@ -9,7 +9,7 @@ public final class MelsecOriginConstants {
     // positions
     public static final int UI_DEFAULT_LOCATION = 10;
 
-    public static final int DEFAULT_BYTE_SIZE_READ_IN_BINARY = 16;  // Byte size per every command, the default value is 16(16Bits)
+    public static final int DEFAULT_BYTE_SIZE_READ_IN_BINARY = 8;  // Byte Block size per every command, Return binary array is 8 bit block, should leave 8;
     //Block size
     public static final int MIN_BLOCK_SIZE = 1;
     public static final int MAX_BLOCK_SIZE = 256;
@@ -80,7 +80,7 @@ public final class MelsecOriginConstants {
     public static final String PLC_CNADDR_DESC = "Specify input CN-Range Address for server can collect";
     public static final String PLC_SBADDR_DESC = "Specify input SB-Range Address for server can collect";
     public static final String PLC_SWADDR_DESC = "Specify input SW-Range Address for server can collect";
-    public static final String PLC_CADDR_DESC = "Specify input C-Range Address for server can collect";
+    public static final String PLC_SADDR_DESC = "Specify input S-Range Address for server can collect";
     public static final String PLC_DXADDR_DESC = "Specify input DX-Range Address for server can collect";
     public static final String PLC_DYADDR_DESC = "Specify input DY-Range Address for server can collect";
     public static final String PLC_ZADDR_DESC = "Specify input Z-Range Address for server can collect";
@@ -124,7 +124,7 @@ public final class MelsecOriginConstants {
     public static final String PLC_CNADDR_LABEL = "Enable CN Address";
     public static final String PLC_SBADDR_LABEL = "Enable SB Address";
     public static final String PLC_SWADDR_LABEL = "Enable SW Address";
-    public static final String PLC_CADDR_LABEL = "Enable C Address";
+    public static final String PLC_SADDR_LABEL = "Enable S Address";
     public static final String PLC_DXADDR_LABEL = "Enable DX Address";
     public static final String PLC_DYADDR_LABEL = "Enable DY Address";
     public static final String PLC_ZADDR_LABEL = "Enable Z Address";

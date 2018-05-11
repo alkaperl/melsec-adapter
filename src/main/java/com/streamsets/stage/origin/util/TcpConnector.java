@@ -22,6 +22,7 @@ public class TcpConnector {
         this.port = port;
         this.timeOut = timeOut;
     }
+
     byte[] makeTCPConnect(byte[] byteCommand) throws StageException {
         byte[] resultMsg = new byte[1024];
         try {
@@ -30,7 +31,9 @@ public class TcpConnector {
             OutputStream output = socket.getOutputStream();
             output.write(byteCommand);
             DataInputStream is = new DataInputStream(socket.getInputStream());
-            is.readFully(resultMsg);
+            int len = is.readInt();
+            //is.readFully(resultMsg);
+            if (len > 0) is.readFully(resultMsg);
             socket.close();
         } catch (UnknownHostException | SocketException e) {
             ErrorCode errorCode = new ErrorCode() {
@@ -52,7 +55,6 @@ public class TcpConnector {
                 public String getCode() {
                     return MelsecOriginConstants.ERROR_451;
                 }
-
                 @Override
                 public String getMessage() {
                     return MelsecOriginConstants.ERROR_451_MESSAGE;
