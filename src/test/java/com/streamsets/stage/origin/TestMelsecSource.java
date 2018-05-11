@@ -39,14 +39,14 @@ public class TestMelsecSource {
         TagAddressInput testDdata = new TagAddressInput();
         List<TagAddressInput> testDList = new ArrayList<>();
         testDdata.beginAddress = "000100";
-        testDdata.endAddress = "000102";
-        testDdata.dataType = MelsecDataType.DWORD;
+        testDdata.endAddress = "00010f";
+        testDdata.dataType = MelsecDataType.WORD;
         testDList.add(testDdata);
 
         TagAddressInput testMdata = new TagAddressInput();
         List<TagAddressInput> testMList = new ArrayList<>();
         testMdata.beginAddress = "000100";
-        testMdata.endAddress = "000102";
+        testMdata.endAddress = "00010F";
         testMdata.dataType = MelsecDataType.BOOLEAN;
         testMList.add(testMdata);
 
@@ -64,7 +64,7 @@ public class TestMelsecSource {
                 .addConfiguration("xAddress", false)
                 .addConfiguration("yAddress", false)
                 .addConfiguration("yAddressRange", testYList)
-                .addConfiguration("mAddress", false)
+                .addConfiguration("mAddress", true)
                 .addConfiguration("mAddressRange", testMList)
                 .addConfiguration("dAddress", true)
                 .addConfiguration("dAddressRange", testDList)

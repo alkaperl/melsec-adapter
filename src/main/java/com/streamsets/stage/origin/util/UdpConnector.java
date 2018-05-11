@@ -1,8 +1,7 @@
 package com.streamsets.stage.origin.util;
 
-import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
-import com.streamsets.stage.lib.MelsecOriginConstants;
+import com.streamsets.stage.lib.Errors;
 
 import java.io.IOException;
 import java.net.*;
@@ -22,7 +21,7 @@ class UdpConnector {
     }
     byte[] makeUDPConnect(byte[] byteCommand) throws StageException  {
         byte[] receiveMsg = new byte[10240];
-        DatagramSocket socket = null;
+        DatagramSocket socket;
         try {
             InetAddress ipAddr = InetAddress.getByName(ip);
             socket = new DatagramSocket();
@@ -33,35 +32,8 @@ class UdpConnector {
             socket.receive(rp);
             socket.close();
 
-        } catch (UnknownHostException | SocketException e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_404;
-                }
-
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_404_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-
-        } catch (IOException e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_401;
-                }
-
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_401_MESSAGE;
-                }
-            };
-            socket.close();
-            throw new StageException(errorCode);
-        }
+        } catch (UnknownHostException | SocketException e) { throw new StageException(Errors.ERROR_404);}
+        catch (IOException e) { throw new StageException(Errors.ERROR_401); }
         return rp.getData();
     }
 

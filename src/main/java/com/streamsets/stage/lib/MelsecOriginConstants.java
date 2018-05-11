@@ -186,30 +186,4 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZADDR_HEXCODE = "CC";
     public static final String PLC_RADDR_HEXCODE = "AF";
     public static final String PLC_ZRADDR_HEXCODE = "B0";
-
-    /////////////ERRORS
-    public static final String ERROR_101 = "101";
-    public static final String ERROR_101_MESSAGE = "Abnormal command result Check Address Range or Address structure(HEX/DEC):";
-    public static final String ERROR_401 = "401";
-    public static final String ERROR_401_MESSAGE = "UDP Connection Has failed. Check Melsec UDP port is opened or ping command reachable";
-    public static final String ERROR_404 = "404";
-    public static final String ERROR_404_MESSAGE = "UDP message has sent, but cannot receive reply message, Check the connectivity or port opened.";
-    public static final String ERROR_451 = "451";
-    public static final String ERROR_451_MESSAGE = "TCP Connection has established, However the TDP cannot get send Message.";
-    public static final String ERROR_454 = "454";
-    public static final String ERROR_454_MESSAGE ="TCP Connection Has failed. Check Melsec TDP port is opened or ping command reachable";
-    public static final String ERROR_500 = "500";
-    public static final String ERROR_500_MESSAGE ="System Type cannot verified, for building address binary check System Type. Some model is not implemented!";
-    public static final String ERROR_501 = "501";
-    public static final String ERROR_501_MESSAGE = "System Type cannot verified for building command binary, check System Type. Some model is not implemented!";
-    public static final String ERROR_502 = "502";
-    public static final String ERROR_502_MESSAGE ="";
-    public static final String ERROR_503 = "503";
-    public static final String ERROR_503_MESSAGE ="System Type cannot verified for dataType, check System Type. Some model is not implemented!";
-    public static final String ERROR_504 = "504";
-    public static final String ERROR_504_MESSAGE ="System Type cannot verified for building CPU Location, check System Type. Some model is not implemented!";
-    public static final String ERROR_505 = "505";
-    public static final String ERROR_505_MESSAGE ="Register Tag cannot verified during building the result address";
-
-
 }

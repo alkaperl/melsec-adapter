@@ -21,6 +21,7 @@ package com.streamsets.stage.origin;
 
 import com.streamsets.pipeline.api.*;
 import com.streamsets.pipeline.api.base.BaseSource;
+import com.streamsets.stage.lib.Errors;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
 import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
@@ -48,20 +49,36 @@ public abstract class MelsecSource extends BaseSource {
 
     @Override
     protected List<ConfigIssue> init() {
-
         // Validate configuration values and open any required resources.
         List<ConfigIssue> issues = super.init();
         lastResultRecord = new HashMap<>();
-        /*if (getConfig().equals("invalidValue")) {
-            issues.add(
-                    getContext().createConfigIssue(
-                            Groups.BASIC.name(), "config", Errors.SAMPLE_00, "Here's what's wrong..."
-                    )
-            );
-        }*/
+        if(dAddressEnabled()) {
+            try { verifyAddressRangeCommand(getDAddressRange(), MelsecOriginConstants.PLC_DADDR_HEXCODE); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.DTAG.name(), "dAddressRange", Errors.ERROR_200, "Address format Fault")); }
+        }
+        if(mAddressEnabled()) {
+            try { verifyAddressRangeCommand(getMAddressRange(), MelsecOriginConstants.PLC_MADDR_HEXCODE); }
+            catch (NumberFormatException e) { issues.add(getContext().createConfigIssue(Groups.MTAG.name(), "mAddressRange", Errors.ERROR_200, "Address format Fault")); }
+        }
 
-        // If issues is not empty, the UI will inform the user of each configuration issue in the list.
+
         return issues;
+    }
+    private void verifyAddressRangeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) {
+        for (TagAddressInput item : getPlcAddressRange) {
+            if (plcAddrHexCode.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || plcAddrHexCode.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
+                    plcAddrHexCode.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+                    plcAddrHexCode.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) ||plcAddrHexCode.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
+                //item.getBeginAddress(); //begin Address
+                //item.getEndAddress();  //endAddress
+            }
+            else {
+                try {
+                    Integer.parseInt(item.getBeginAddress());
+                    Integer.parseInt(item.getEndAddress());
+                } catch (NumberFormatException e){ throw new NumberFormatException(); }
+            }
+        }
     }
 
     /**
@@ -181,23 +198,11 @@ public abstract class MelsecSource extends BaseSource {
                 @Override
                 public String getCode() { return e.getErrorCode().getCode(); }
                 @Override
-                public String getMessage() { return e.getMessage().substring(6); }
+                public String getMessage() { return e.getMessage().substring(12); }
             };
             throw new StageException(errorCode);
 
-        } catch (InterruptedException e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return "999";
-                }
-                @Override
-                public String getMessage() {
-                    return "General Error";
-                }
-            };
-            throw new StageException(errorCode);
-        }
+        } catch (InterruptedException e) { throw new StageException(Errors.ERROR_001); }
         ++nextSourceOffset;
         return String.valueOf(nextSourceOffset);
     }

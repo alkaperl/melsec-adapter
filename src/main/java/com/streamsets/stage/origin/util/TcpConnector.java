@@ -1,8 +1,7 @@
 package com.streamsets.stage.origin.util;
 
-import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
-import com.streamsets.stage.lib.MelsecOriginConstants;
+import com.streamsets.stage.lib.Errors;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 ////////////////ERROR CODE BEGINS 450 (cannot connect)
-public class TcpConnector {
+class TcpConnector {
     private String ip;
     private int port;
     private int timeOut;
@@ -35,37 +34,12 @@ public class TcpConnector {
             //is.readFully(resultMsg);
             if (len > 0) is.readFully(resultMsg);
             socket.close();
-        } catch (UnknownHostException | SocketException e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_454;
-                }
-
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_454_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-
-        } catch (IOException e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_451;
-                }
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_451_MESSAGE;
-                }
-            };
-            try {
-                socket.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            throw new StageException(errorCode);
+        }
+        catch (UnknownHostException | SocketException e) {throw new StageException(Errors.ERROR_454);}
+        catch (IOException e) {
+            try { socket.close(); }
+            catch (IOException e1) { e1.printStackTrace(); }
+            throw new StageException(Errors.ERROR_451);
         }
         return resultMsg;
     }

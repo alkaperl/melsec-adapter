@@ -1,7 +1,7 @@
 package com.streamsets.stage.origin.util;
 
-import com.streamsets.pipeline.api.ErrorCode;
 import com.streamsets.pipeline.api.StageException;
+import com.streamsets.stage.lib.Errors;
 import com.streamsets.stage.lib.MelsecOriginConstants;
 
 import java.util.ArrayList;
@@ -55,20 +55,7 @@ public class CommandRunner {
                 default:
                     byteCommand = new byte[]{0x03, (byte) 0xFF};
             }
-        } catch (Exception e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_504;
-                }
-
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_504_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-        }
+        } catch (Exception e) { throw new StageException(Errors.ERROR_504); }
         return byteCommand;
     }
 
@@ -92,20 +79,7 @@ public class CommandRunner {
                     byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
                     break;
             }
-        } catch (Exception e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_503;
-                }
-
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_503_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-        }
+        } catch (Exception e) { throw new StageException(Errors.ERROR_503); }
         return byteCommand;
     }
 
@@ -232,19 +206,7 @@ public class CommandRunner {
                 case "IQR_SERIES":
                     break;
             }
-        } catch (Exception e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_501;
-                }
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_501_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-        }
+        } catch (Exception e) { throw new StageException(Errors.ERROR_501); }
         return byteCommand;
     }
 
@@ -285,19 +247,7 @@ public class CommandRunner {
             byteCommand[19]= (byte)(blockSize);
             byteCommand[20]= (byte)(blockSize >> 8);
 
-        } catch (Exception e) {
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_500;
-                }
-                @Override
-                public String getMessage() {
-                    return MelsecOriginConstants.ERROR_500_MESSAGE;
-                }
-            };
-            throw new StageException(errorCode);
-        }
+        } catch (Exception e) { throw new StageException(Errors.ERROR_500); }
         int resultLength=0;
         if (commType.equals("UDP")) {
             UdpConnector udpConnector = new UdpConnector(ip, port, timeOut);
@@ -311,22 +261,14 @@ public class CommandRunner {
         //resultMSG 9&10 should be 0x00 0x00
         assert resultMsg != null;
         if (!(resultMsg[9] == 0x00) || !(resultMsg[10] == 0x00)) {
-            byte[] finalResultMsg = resultMsg;
-            ErrorCode errorCode = new ErrorCode() {
-                @Override
-                public String getCode() {
-                    return MelsecOriginConstants.ERROR_101;
-                }
-                @Override
-                public String getMessage() { return MelsecOriginConstants.ERROR_101_MESSAGE + finalResultMsg[10] + finalResultMsg[9]; }
-            };
-            throw new StageException(errorCode);
+            throw new StageException(Errors.ERROR_101);
+            // finalResultMsg[10] + finalResultMsg[9]; }
         }
         return resultBuilder(resultMsg, resultLength);
     }
 
     private List<Integer> resultBuilder(byte[] byteResult, int length) {
-        List<Integer> result = new ArrayList();
+        List<Integer> result = new ArrayList<>();
         for (int i=11; i< length;i++) {
             int resultInt = Integer.parseInt(String.valueOf(byteResult[i]));
             if(resultInt< 0 ) resultInt = resultInt+256;
@@ -335,9 +277,9 @@ public class CommandRunner {
         return result;
     }
 
-    private String increaseAddress(String currentAddress, int step) {
+    private String increaseAddress(String currentAddress) {
         long addressNext = Long.parseLong(currentAddress, 16);
-        addressNext = addressNext + step;
+        addressNext = addressNext + 1;
         StringBuilder result = new StringBuilder(Long.toHexString(addressNext));
         while (result.length() < 6) { result.insert(0, "0"); }
         return result.toString();
@@ -402,7 +344,7 @@ public class CommandRunner {
                             String returnValue = returnBinaryValue(commandResult.get(iter));
                             resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - k, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - k)));
                             if (currentAddress.equalsIgnoreCase(this.endAddress)) { return resultMap; }//return value no other choice until 20180510
-                            currentAddress = increaseAddress(currentAddress, 1);
+                            currentAddress = increaseAddress(currentAddress);
                         }
                         iter++;
                     }
@@ -417,11 +359,11 @@ public class CommandRunner {
                     int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
                     if (resultValue < 0) { resultValue = resultValue + (int) Math.pow(2, 31); }
                     resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
-                    currentAddress = increaseAddress(currentAddress, 1);
+                    currentAddress = increaseAddress(currentAddress);
                     break;
                 }
             }
-            currentAddress = increaseAddress(currentAddress, 1);
+            currentAddress = increaseAddress(currentAddress);
         }
         return resultMap;
     }
