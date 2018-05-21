@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CommandRunner {
+public class ByteCommandRunner {
     private String systemType;
     private String ip;
     private int port, timeOut;
@@ -17,7 +17,7 @@ public class CommandRunner {
     private String networkId, plcId, cpuLocation, stationId, dataType, tagType;
     private String currentAddress, endAddress;
 
-    public CommandRunner(String ip, int port, String systemType, String commType, int timeOut) {
+    public ByteCommandRunner(String ip, int port, String systemType, String commType, int timeOut) {
         this.systemType = systemType;
         this.ip = ip;
         this.port = port;

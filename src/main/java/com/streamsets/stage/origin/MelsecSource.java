@@ -26,7 +26,7 @@ import com.streamsets.stage.lib.MelsecOriginConstants;
 import com.streamsets.stage.origin.menuconfig.MelsecCommtype;
 import com.streamsets.stage.origin.menuconfig.MelsecSystemType;
 import com.streamsets.stage.origin.menuconfig.TagAddressInput;
-import com.streamsets.stage.origin.util.CommandRunner;
+import com.streamsets.stage.origin.util.ByteCommandRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -254,11 +254,11 @@ public abstract class MelsecSource extends BaseSource {
     private Map<String, Map<Integer, Boolean>> executeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         //Map <String, Map<Integer, Boolean>> temp = new HashMap<>();
         Map<String, Map<Integer, Boolean>> resultMap = new HashMap<>();
-        CommandRunner commandRunner = new CommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
+        ByteCommandRunner byteCommandRunner = new ByteCommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         //long beginTime = System.currentTimeMillis();
         for (TagAddressInput item : getPlcAddressRange) {
             Map<String, Map<Integer, Boolean>> tempMap;
-            tempMap = commandRunner.readByteCommandResult(
+            tempMap = byteCommandRunner.readByteCommandResult(
                     item.getBeginAddress(), //begin Address
                     item.getEndAddress(),  //endAddress
                     item.getNetworkId(),  // NETWORK ID
@@ -311,7 +311,7 @@ public abstract class MelsecSource extends BaseSource {
             if (zAddressEnabled()) {currentResultRecord.putAll(executeCommand(getZAddressRange(), MelsecOriginConstants.PLC_ZADDR_HEXCODE));}
             if (rAddressEnabled()) {currentResultRecord.putAll(executeCommand(getRAddressRange(), MelsecOriginConstants.PLC_RADDR_HEXCODE));}
             if (zrAddressEnabled()) {currentResultRecord.putAll(executeCommand(getZRAddressRange(), MelsecOriginConstants.PLC_ZRADDR_HEXCODE));}
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             if (getTransferMode()) {
                 if (lastResultRecord.size() == 0) {
                     for (String key : currentResultRecord.keySet()) {
@@ -367,8 +367,8 @@ public abstract class MelsecSource extends BaseSource {
 
 
     private String getASCIIString(Integer items) {
-        int hiChar = items / 256;
-        int loChar = items % 256;
+        int loChar = items / 256;
+        int hiChar = items % 256;
         char firstChar = (char) hiChar;
         char secondChar = (char) loChar;
         return String.valueOf(firstChar) + String.valueOf(secondChar);
