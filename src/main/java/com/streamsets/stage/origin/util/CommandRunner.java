@@ -25,6 +25,51 @@ public class CommandRunner {
         this.commType = commType;
     }
 
+    public Map<String, Map<Integer, Boolean>> readByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
+        ////////////////////////////////////////////////
+        //Initial the global variables.
+        this.networkId = networkId;
+        this.plcId = plcId;
+        this.cpuLocation = cpuLocation;
+        this.dataType = dataType;
+        this.tagType = tagType;
+        this.stationId = stationId;
+        this.endAddress = endAddressString;
+        /////////////////////////////////////////////////
+        Map<String, Map<Integer, Boolean>> resultMap = new HashMap<>();
+        Map<String, Map<Integer, Boolean>> tempMap;
+        long beginAddress, endAddress;
+        boolean isHex = false;
+        if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
+            beginAddress = Long.parseLong(beginAddressString, 16);
+            endAddress = Long.parseLong(this.endAddress, 16);
+            isHex = true;
+        } else {
+            beginAddress = Long.parseLong(beginAddressString);
+            endAddress = Long.parseLong(this.endAddress);
+        }
+        long count = endAddress - beginAddress +1;
+        if(count < 0) { count = 0; }
+        int wordCount;
+        if (tagType.equals(MelsecOriginConstants.PLC_DADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_TNADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_SNADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_CNADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
+                tagType.equals(MelsecOriginConstants.PLC_ZADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_RADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE) ){
+            wordCount = (int)count;
+        }
+        else { wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1; }  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
+        int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
+        int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
+        currentAddress = beginAddressString;
+        for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
+            if (i < blockCount) { tempMap = singleBlockByteCommand(blockSize, isHex); }
+            else { tempMap = singleBlockByteCommand(blockRemain, isHex); }
+            resultMap.putAll(tempMap);
+        }
+        return resultMap;
+    }
+
     private byte[] getCpuLocationByteCommand(String cpuLocation) throws StageException {
         byte[] byteCommand = null;
         try {
@@ -60,7 +105,7 @@ public class CommandRunner {
     }
 
     private byte[] getSubCommand(String dataType) throws StageException {
-        byte[] byteCommand = null;
+        byte[] byteCommand;
         try {
             switch (dataType) {
                 case "BOOLEAN":
@@ -69,7 +114,7 @@ public class CommandRunner {
                 case "WORD":
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
-                case "SHORT":
+                case "UNSIGNED_INTEGER":
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
                 case "FLOAT":
@@ -77,6 +122,12 @@ public class CommandRunner {
                     break;
                 case "DWORD":
                     byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
+                    break;
+                case "SIGNED_INTEGER":
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
+                    break;
+                default :
+                    byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
             }
         } catch (Exception e) { throw new StageException(Errors.ERROR_503); }
@@ -185,7 +236,7 @@ public class CommandRunner {
                             numberToByteArray(networkId)[0], numberToByteArray(plcId)[0],//station number
                             cpuLocationByte[1], cpuLocationByte[0],//CPULocation (big endian -> reversed low bit)
                             numberToByteArray(stationId)[0],//des. station number
-                            0x0C, 0x00,//request length 요 뒤에 총 12개 바이트가 이ㅆ으(default value = 12(C))
+                            0x0C, 0x00,//request length 요 뒤에 총 12개 바이트 (default value = 12(C))
                             MelsecOriginConstants.LOW_BYTE_CPU_TIMER, MelsecOriginConstants.HI_BYTE_CPU_TIMER,//cpu timer
                             0x01, 0x04,//Main command
                             subCommand[1], subCommand[0],//sub command(bits read or word read? word 01 00)
@@ -257,6 +308,7 @@ public class CommandRunner {
         else if (commType.equals("TCPIP")) {
             TcpConnector tcpConnector = new TcpConnector(ip,port, timeOut);
             resultMsg = tcpConnector.makeTCPConnect(byteCommand);
+            resultLength  = tcpConnector.getLength();
         }
         //resultMSG 9&10 should be 0x00 0x00
         assert resultMsg != null;
@@ -277,10 +329,20 @@ public class CommandRunner {
         return result;
     }
 
-    private String increaseAddress(String currentAddress) {
-        long addressNext = Long.parseLong(currentAddress, 16);
-        addressNext = addressNext + 1;
-        StringBuilder result = new StringBuilder(Long.toHexString(addressNext));
+    private String increaseAddress(String currentAddress, boolean isHex) {
+        long addressNext;
+        StringBuilder result;
+        if (isHex) {
+            addressNext = Long.parseLong(currentAddress, 16);
+            addressNext = addressNext + 1;
+            result = new StringBuilder(Long.toHexString(addressNext));
+        }
+        else {
+            addressNext = Long.parseLong(currentAddress);
+            addressNext = addressNext + 1;
+            result = new StringBuilder(String.valueOf(addressNext));
+        }
+
         while (result.length() < 6) { result.insert(0, "0"); }
         return result.toString();
     }
@@ -292,86 +354,67 @@ public class CommandRunner {
         return String.valueOf(fullAddress);
     }
 
-    public Map<String, Integer> readByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
-        ////////////////////////////////////////////////
-        //Initial the global variables.
-        this.networkId = networkId;
-        this.plcId = plcId;
-        this.cpuLocation = cpuLocation;
-        this.dataType = dataType;
-        this.tagType = tagType;
-        this.stationId = stationId;
-        this.endAddress = endAddressString;
-        /////////////////////////////////////////////////
-        Map<String, Integer> resultMap = new HashMap<>();
-        Map<String, Integer> tempMap;
-        long beginAddress, endAddress;
-        if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
-                tagType.equals(MelsecOriginConstants.PLC_WADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SBADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_SWADDR_HEXCODE) ||
-                tagType.equals(MelsecOriginConstants.PLC_DXADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_DYADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_ZRADDR_HEXCODE)) {
-            beginAddress = Long.parseLong(beginAddressString, 16);
-            endAddress = Long.parseLong(this.endAddress, 16);
-        } else {
-            beginAddress = Long.parseLong(beginAddressString);
-            endAddress = Long.parseLong(this.endAddress);
-        }
-        long count = endAddress - beginAddress +1;
-        if(count < 0) { count = 0; }
-        int wordCount = (int)count / MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY+1;  // Total address count divide 16(0-F), remain is discard. ex) 16008/16=1001 ... will ++
-        int blockRemain = wordCount%blockSize;  // Remain block that not fully filled one block. 1000/128=1000-896 = 104
-        int blockCount = (wordCount /blockSize); //Bitcount divide max-blocksize per command remain add 1 ex) 1000/128 =8 7... should loop one more time;
-        currentAddress = beginAddressString;
-        for (int i = 0; i <= blockCount; i++) {//remain should loop one more time
-            if (i < blockCount) { tempMap = singleBlockByteCommand(blockSize); }
-            else { tempMap = singleBlockByteCommand(blockRemain); }
-            resultMap.putAll(tempMap);
-        }
-        return resultMap;
-    }
-
-    private Map<String, Integer> singleBlockByteCommand(int blockSize) throws StageException {
-        Map<String, Integer> resultMap=new HashMap<>();
+    private Map<String, Map <Integer, Boolean>> singleBlockByteCommand(int blockSize, boolean isHex) throws StageException {
+        Map<String, Map <Integer, Boolean>> resultMap=new HashMap<>();
+        //resultMap.put("AAA", new HashMap<Integer, Boolean>(){{put(1, false);}});
         List<Integer> commandResult = sendInByteCommand(currentAddress, blockSize);
         int count = commandResult.size();
-        if (this.dataType.equals("DWORD")) {
-            count = count - 2;
-        }
+        if (this.dataType.equals("DWORD")) { count = count - 2; }
+        else if (this.dataType.equals("WORD")||this.dataType.equals("ASCII")) { count = count - 1; }
         for (int iter=0; iter<count; iter++) {
             switch (this.dataType) {
                 case "BOOLEAN":
                     for (int j = 0; j < 2; j++) {
                         for (int k = 0; k < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; k++) {
                             String returnValue = returnBinaryValue(commandResult.get(iter));
-                            resultMap.put(getFullMelsecAddress(currentAddress), Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - k, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - k)));
+                            int finalK = k;
+                            resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - finalK, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - finalK)), false);}});
                             if (currentAddress.equalsIgnoreCase(this.endAddress)) { return resultMap; }//return value no other choice until 20180510
-                            currentAddress = increaseAddress(currentAddress);
+                            currentAddress = increaseAddress(currentAddress, isHex);
                         }
                         iter++;
                     }
                     break;
+                case "SIGNED_INTEGER": {
+                    int resultValue = commandResult.get(iter);
+                    resultValue += (commandResult.get(++iter) << 8);
+                    if(resultValue>Math.pow(2, 15)-1) resultValue = (int) (resultValue-Math.pow(2, 16));
+                    int finalResultValue = resultValue;
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    break;
+                }
+                case "UNSIGNED_INTEGER": {
+                    int resultValue = commandResult.get(iter);
+                    resultValue += (commandResult.get(++iter) << 8);
+                    int finalResultValue = resultValue;
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    break;
+                }
                 case "WORD": {
                     int resultValue = commandResult.get(iter);
                     resultValue += (commandResult.get(++iter) << 8);
-                    resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
+                    int finalResultValue = resultValue;
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, true);}});
+                    iter++;
                     break;
                 }
                 case "DWORD": {
                     int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
                     if (resultValue < 0) { resultValue = resultValue + (int) Math.pow(2, 31); }
-                    resultMap.put(getFullMelsecAddress(currentAddress), resultValue);
-                    currentAddress = increaseAddress(currentAddress);
+                    int finalResultValue = resultValue;
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    currentAddress = increaseAddress(currentAddress, isHex);
                     break;
                 }
             }
-            currentAddress = increaseAddress(currentAddress);
+            currentAddress = increaseAddress(currentAddress,  isHex);
         }
         return resultMap;
     }
+
     private String returnBinaryValue (Integer itemValue){
         StringBuilder returnValue = new StringBuilder(Integer.toBinaryString(itemValue));
-        while (returnValue.length() < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY) {
-            returnValue.insert(0, "0");
-        }
+        while (returnValue.length() < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY) { returnValue.insert(0, "0"); }
         return returnValue.toString();
     }
 }

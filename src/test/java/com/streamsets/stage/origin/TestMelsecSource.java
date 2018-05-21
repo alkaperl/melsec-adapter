@@ -39,14 +39,14 @@ public class TestMelsecSource {
         TagAddressInput testDdata = new TagAddressInput();
         List<TagAddressInput> testDList = new ArrayList<>();
         testDdata.beginAddress = "000100";
-        testDdata.endAddress = "00010f";
+        testDdata.endAddress = "000110";
         testDdata.dataType = MelsecDataType.WORD;
         testDList.add(testDdata);
 
         TagAddressInput testMdata = new TagAddressInput();
         List<TagAddressInput> testMList = new ArrayList<>();
         testMdata.beginAddress = "000100";
-        testMdata.endAddress = "00010F";
+        testMdata.endAddress = "000111";
         testMdata.dataType = MelsecDataType.BOOLEAN;
         testMList.add(testMdata);
 
@@ -64,7 +64,7 @@ public class TestMelsecSource {
                 .addConfiguration("xAddress", false)
                 .addConfiguration("yAddress", false)
                 .addConfiguration("yAddressRange", testYList)
-                .addConfiguration("mAddress", true)
+                .addConfiguration("mAddress", false)
                 .addConfiguration("mAddressRange", testMList)
                 .addConfiguration("dAddress", true)
                 .addConfiguration("dAddressRange", testDList)
@@ -94,7 +94,7 @@ public class TestMelsecSource {
                 .addConfiguration("timeOut", 3000)
                 .addConfiguration("timeInterval", 1000)
                 .addConfiguration("port", 5000)
-                .addConfiguration("commType", MelsecCommtype.TCPIP)
+                .addConfiguration("commType", MelsecCommtype.UDP)
                 .addConfiguration("systemType", MelsecSystemType.Q_SERIES)
                 .addConfiguration("ipAddress", "127.0.0.1")
                 .addOutputLane("lane")

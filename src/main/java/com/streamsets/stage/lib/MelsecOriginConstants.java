@@ -1,6 +1,7 @@
 package com.streamsets.stage.lib;
 
 public final class MelsecOriginConstants {
+
     // CPU TIMER(0x00, 1 unit = 250 msec)
     public static final byte LOW_BYTE_CPU_TIMER = 0x02; //CPU WAIT TIMER 0x02 00means 250*02 = 500Msecs
     public static final byte HI_BYTE_CPU_TIMER = 0x00;
@@ -135,11 +136,12 @@ public final class MelsecOriginConstants {
     public static final String TCPIP = "TCP/IP";
     public static final String UDP = "UDP";
     //Data TYPE option
-    public static final String BOOLEAN = "boolean(1Bit)";
-    public static final String FLOAT = "float(16Bit)";
-    public static final String WORD = "word(16Bit)";
+    public static final String BOOLEAN = "Boolean(1Bit)";
+    public static final String FLOAT = "Float(16Bit)";
+    public static final String SIGNED_INTEGER = "Signed Integer(16Bit)";
     public static final String DWORD = "Double Word(32Bit)";
-    public static final String SHORT = "Short Number(16 Bit)";
+    public static final String WORD = "Word (16Bit, ASCII Read)";
+    public static final String UNSIGNED_INTEGER = "Unsigned Integer(16Bit)";
 
     //CPU TYPE OPTION
     public static final String Q_SERIES = "Q Series";
@@ -188,4 +190,5 @@ public final class MelsecOriginConstants {
     public static final String PLC_ZRADDR_HEXCODE = "B0";
 
     public static final String NUMBER_FORMAT_ERROR_MSG = "Address format Fault!";
+    public static final String DATA_READ_FORMAT_ERROR_MSG = "Boolean type is not supported in this TAG";
 }

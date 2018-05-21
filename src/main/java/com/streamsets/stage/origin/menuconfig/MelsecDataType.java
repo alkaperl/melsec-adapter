@@ -8,14 +8,13 @@ import com.streamsets.stage.lib.MelsecOriginConstants;
 public enum MelsecDataType implements Label {
     BOOLEAN(MelsecOriginConstants.BOOLEAN),
     WORD(MelsecOriginConstants.WORD),
-    //SHORT(MelsecOriginConstants.SHORT),
-    DWORD(MelsecOriginConstants.DWORD);
-    //FLOAT(MelsecOriginConstants.FLOAT);
+    SIGNED_INTEGER(MelsecOriginConstants.SIGNED_INTEGER),
+    DWORD(MelsecOriginConstants.DWORD),
+    FLOAT(MelsecOriginConstants.FLOAT),
+    UNSIGNED_INTEGER(MelsecOriginConstants.UNSIGNED_INTEGER);
     private final String label;
 
-    MelsecDataType(String label) {
-        this.label = label;
-    }
+    MelsecDataType(String label) { this.label = label; }
 
     @Override
     public String getLabel() {
