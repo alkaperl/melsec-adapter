@@ -42,7 +42,7 @@ import static java.lang.Thread.sleep;
  */
 public abstract class MelsecSource extends BaseSource {
     private static final Logger LOG = LoggerFactory.getLogger(MelsecSource.class);
-    private Map<String, HashMap<Integer, Boolean>> lastResultRecord;
+    private Map<String, HashMap<Integer, String>> lastResultRecord;
 
     /**
      * Gives access to the UI configuration of the stage provided by the {@link MelsecDSource} class.
@@ -223,10 +223,12 @@ public abstract class MelsecSource extends BaseSource {
         return issues;
     }
 
-    private void verifyAddressRangeCommand(List<TagAddressInput> getPlcAddressRange) throws NumberFormatException {
+    private void verifyAddressRangeCommand(List<TagAddressInput> getPlcAddressRange) {
         for (TagAddressInput item : getPlcAddressRange) {
-            Integer.parseInt(item.getBeginAddress());
-            Integer.parseInt(item.getEndAddress());
+            try {
+                Integer.parseInt(item.getBeginAddress());
+                Integer.parseInt(item.getEndAddress());
+            } catch (NumberFormatException ne) { throw new NumberFormatException(); }
         }
     }
 
@@ -251,13 +253,13 @@ public abstract class MelsecSource extends BaseSource {
      * {@inheritDoc}
      */
 
-    private Map<String, Map<Integer, Boolean>> executeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
+    private Map<String, Map<Integer, String>> executeCommand(List<TagAddressInput> getPlcAddressRange, String plcAddrHexCode) throws StageException {
         //Map <String, Map<Integer, Boolean>> temp = new HashMap<>();
-        Map<String, Map<Integer, Boolean>> resultMap = new HashMap<>();
+        Map<String, Map<Integer, String>> resultMap = new HashMap<>();
         ByteCommandRunner byteCommandRunner = new ByteCommandRunner(getIpAddress(), getPort(), getSystemType().name(), getCommType().name(), getTimeOut());
         //long beginTime = System.currentTimeMillis();
         for (TagAddressInput item : getPlcAddressRange) {
-            Map<String, Map<Integer, Boolean>> tempMap;
+            Map<String, Map<Integer, String>> tempMap;
             tempMap = byteCommandRunner.readByteCommandResult(
                     item.getBeginAddress(), //begin Address
                     item.getEndAddress(),  //endAddress
@@ -279,10 +281,8 @@ public abstract class MelsecSource extends BaseSource {
     @Override
     public String produce(String lastSourceOffset, int maxBatchSize, BatchMaker batchMaker) throws StageException {
         long nextSourceOffset = 0;
-        Map<String, Map<Integer, Boolean>> currentResultRecord = new HashMap<>();
-        if (lastSourceOffset != null) {
-            nextSourceOffset = Long.parseLong(lastSourceOffset);
-        }
+        Map<String, Map<Integer, String>> currentResultRecord = new HashMap<>();
+        if (lastSourceOffset != null) { nextSourceOffset = Long.parseLong(lastSourceOffset); }
         try {
             long beginTime = System.currentTimeMillis();
             if (xAddressEnabled()) { currentResultRecord.putAll(executeCommand(getXAddressRange(), MelsecOriginConstants.PLC_XADDR_HEXCODE)); }
@@ -332,7 +332,7 @@ public abstract class MelsecSource extends BaseSource {
                         }
                     }
                 }
-                lastResultRecord = (Map<String, HashMap<Integer, Boolean>>) ((HashMap<String, Map<Integer, Boolean>>) currentResultRecord).clone();
+                lastResultRecord = (Map<String, HashMap<Integer, String>>) ((HashMap<String, Map<Integer, String>>) currentResultRecord).clone();
                 currentResultRecord.clear();
             } else {
                 for (String key : currentResultRecord.keySet()) {
@@ -374,12 +374,21 @@ public abstract class MelsecSource extends BaseSource {
         return String.valueOf(firstChar) + String.valueOf(secondChar);
     }
 
-    private Map<String, Field> getResultMap(Map<Integer, Boolean> resultRecord, String key) {
+    private Map<String, Field> getResultMap(Map<Integer, String> resultRecord, String key) {
         Map <String, Field> resultMap = new HashMap<>();
         for( Integer items : resultRecord.keySet()) {
             // if this is not ASCII
-            if (!resultRecord.get(items)) { resultMap.put(key, Field.create(items)); }
-            else { resultMap.put(key, Field.create(getASCIIString(items))); }
+            switch (resultRecord.get(items)) {
+                case MelsecOriginConstants.WORD_CASE:
+                    resultMap.put(key, Field.create(getASCIIString(items)));
+                    break;
+                case MelsecOriginConstants.FLOAT_CASE:
+                    resultMap.put(key, Field.create(Float.intBitsToFloat(items)));
+                    break;
+                default:
+                    resultMap.put(key, Field.create(items));
+                    break;
+            }
         }
     return resultMap;
     }

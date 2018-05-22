@@ -143,6 +143,16 @@ public final class MelsecOriginConstants {
     public static final String WORD = "Word (16Bit, ASCII Read)";
     public static final String UNSIGNED_INTEGER = "Unsigned Integer(16Bit)";
 
+    //Data Type Option Label 데이터 타입별로 파싱해서 맵에 넣거나, 읽는 명령어가 달라짐 플래그로도 사용
+    public static final String BOOLEAN_CASE = "BOOLEAN";
+    public static final String FLOAT_CASE = "FLOAT";
+    public static final String SIGNED_INTEGER_CASE= "SIGNED_INTEGER";
+    public static final String DWORD_CASE = "DWORD";
+    public static final String WORD_CASE = "WORD";
+    public static final String UNSIGNED_INTEGER_CASE = "UNSIGNED_INTEGER";
+
+
+
     //CPU TYPE OPTION
     public static final String Q_SERIES = "Q Series";
     public static final String A_SERIES = "A Series";

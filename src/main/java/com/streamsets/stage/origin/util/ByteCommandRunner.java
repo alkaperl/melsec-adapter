@@ -25,7 +25,7 @@ public class ByteCommandRunner {
         this.commType = commType;
     }
 
-    public Map<String, Map<Integer, Boolean>> readByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
+    public Map<String, Map<Integer, String>> readByteCommandResult(String beginAddressString, String endAddressString, String networkId, String plcId, String cpuLocation, String stationId, String dataType, String tagType, int blockSize) throws StageException {
         ////////////////////////////////////////////////
         //Initial the global variables.
         this.networkId = networkId;
@@ -36,8 +36,8 @@ public class ByteCommandRunner {
         this.stationId = stationId;
         this.endAddress = endAddressString;
         /////////////////////////////////////////////////
-        Map<String, Map<Integer, Boolean>> resultMap = new HashMap<>();
-        Map<String, Map<Integer, Boolean>> tempMap;
+        Map<String, Map<Integer, String>> resultMap = new HashMap<>();
+        Map<String, Map<Integer, String>> tempMap;
         long beginAddress, endAddress;
         boolean isHex = false;
         if (tagType.equals(MelsecOriginConstants.PLC_XADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_YADDR_HEXCODE) || tagType.equals(MelsecOriginConstants.PLC_BADDR_HEXCODE) ||
@@ -108,22 +108,22 @@ public class ByteCommandRunner {
         byte[] byteCommand;
         try {
             switch (dataType) {
-                case "BOOLEAN":
+                case MelsecOriginConstants.BOOLEAN_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //bit read 1 bit
                     break;
-                case "WORD":
+                case MelsecOriginConstants.SIGNED_INTEGER_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
-                case "UNSIGNED_INTEGER":
+                case MelsecOriginConstants.UNSIGNED_INTEGER_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
-                case "FLOAT":
+                case MelsecOriginConstants.FLOAT_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
                     break;
-                case "DWORD":
+                case MelsecOriginConstants.WORD_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //word read 2 bit
                     break;
-                case "SIGNED_INTEGER":
+                case MelsecOriginConstants.DWORD_CASE:
                     byteCommand = new byte[]{0x00, 0x00};  //word read 1 bit
                     break;
                 default :
@@ -354,55 +354,62 @@ public class ByteCommandRunner {
         return String.valueOf(fullAddress);
     }
 
-    private Map<String, Map <Integer, Boolean>> singleBlockByteCommand(int blockSize, boolean isHex) throws StageException {
-        Map<String, Map <Integer, Boolean>> resultMap=new HashMap<>();
-        //resultMap.put("AAA", new HashMap<Integer, Boolean>(){{put(1, false);}});
+    private Map<String, Map <Integer, String>> singleBlockByteCommand(int blockSize, boolean isHex) throws StageException {
+        Map<String, Map <Integer, String>> resultMap=new HashMap<>();
         List<Integer> commandResult = sendInByteCommand(currentAddress, blockSize);
         int count = commandResult.size();
-        if (this.dataType.equals("DWORD")) { count = count - 2; }
-        else if (this.dataType.equals("WORD")||this.dataType.equals("ASCII")) { count = count - 1; }
+        if (this.dataType.equals(MelsecOriginConstants.DWORD_CASE) || this.dataType.equals(MelsecOriginConstants.FLOAT_CASE)) { count = count - 2; }
+        else if (this.dataType.equals(MelsecOriginConstants.WORD_CASE) || this.dataType.equals(MelsecOriginConstants.UNSIGNED_INTEGER_CASE) || this.dataType.equals(MelsecOriginConstants.SIGNED_INTEGER_CASE)) { count = count - 1; }
         for (int iter=0; iter<count; iter++) {
             switch (this.dataType) {
-                case "BOOLEAN":
+                case MelsecOriginConstants.BOOLEAN_CASE:
                     for (int j = 0; j < 2; j++) {
                         for (int k = 0; k < MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY; k++) {
                             String returnValue = returnBinaryValue(commandResult.get(iter));
                             int finalK = k;
-                            resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - finalK, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - finalK)), false);}});
+                            resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(Integer.valueOf(returnValue.substring(MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - 1 - finalK, MelsecOriginConstants.DEFAULT_BYTE_SIZE_READ_IN_BINARY - finalK)), MelsecOriginConstants.BOOLEAN_CASE);}});
                             if (currentAddress.equalsIgnoreCase(this.endAddress)) { return resultMap; }//return value no other choice until 20180510
                             currentAddress = increaseAddress(currentAddress, isHex);
                         }
                         iter++;
                     }
                     break;
-                case "SIGNED_INTEGER": {
+                case MelsecOriginConstants.SIGNED_INTEGER_CASE: {
                     int resultValue = commandResult.get(iter);
                     resultValue += (commandResult.get(++iter) << 8);
                     if(resultValue>Math.pow(2, 15)-1) resultValue = (int) (resultValue-Math.pow(2, 16));
                     int finalResultValue = resultValue;
-                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(finalResultValue, MelsecOriginConstants.BOOLEAN_CASE);}});
                     break;
                 }
-                case "UNSIGNED_INTEGER": {
+                case MelsecOriginConstants.UNSIGNED_INTEGER_CASE: {
                     int resultValue = commandResult.get(iter);
                     resultValue += (commandResult.get(++iter) << 8);
                     int finalResultValue = resultValue;
-                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(finalResultValue, MelsecOriginConstants.UNSIGNED_INTEGER_CASE);}});
                     break;
                 }
-                case "WORD": {
+                case MelsecOriginConstants.WORD_CASE: {
                     int resultValue = commandResult.get(iter);
                     resultValue += (commandResult.get(++iter) << 8);
                     int finalResultValue = resultValue;
-                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, true);}});
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(finalResultValue, MelsecOriginConstants.WORD_CASE);}});
                     iter++;
                     break;
                 }
-                case "DWORD": {
+                case MelsecOriginConstants.DWORD_CASE: {
                     int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
                     if (resultValue < 0) { resultValue = resultValue + (int) Math.pow(2, 31); }
                     int finalResultValue = resultValue;
-                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, Boolean>(){{put(finalResultValue, false);}});
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(finalResultValue, MelsecOriginConstants.DWORD_CASE);}});
+                    currentAddress = increaseAddress(currentAddress, isHex);
+                    break;
+                }
+                case MelsecOriginConstants.FLOAT_CASE: {
+                    int resultValue = commandResult.get(iter) + (commandResult.get(++iter) << 8) + (commandResult.get(++iter) << 16) + (commandResult.get(++iter) << 24);
+                    if (resultValue < 0) { resultValue = resultValue + (int) Math.pow(2, 31); }
+                    int finalResultValue = resultValue;
+                    resultMap.put(getFullMelsecAddress(currentAddress), new HashMap<Integer, String>(){{put(finalResultValue, MelsecOriginConstants.FLOAT_CASE);}});
                     currentAddress = increaseAddress(currentAddress, isHex);
                     break;
                 }
